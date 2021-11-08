@@ -18,12 +18,8 @@ import logging
 from subprocess import PIPE, Popen
 
 from bme280 import BME280
-from enviroplus import gas
 from fonts.ttf import RobotoMedium as UserFont
 from PIL import Image, ImageDraw, ImageFont
-from pms5003 import PMS5003
-from pms5003 import ReadTimeoutError as pmsReadTimeoutError
-from pms5003 import SerialTimeoutError
 
 logging.basicConfig(
     format='%(asctime)s.%(msecs)03d %(levelname)-8s %(message)s',
@@ -39,19 +35,15 @@ Press Ctrl+C to exit!
 """
 )
 
+COLUMN_COUNT = 1
+
 # BME280 temperature/pressure/humidity sensor
 bme280 = BME280()
 
-# PMS5003 particulate sensor
-pms5003 = PMS5003()
-time.sleep(1.0)
-
-# Create ST7735 LCD display class
-st7735 = ST7735.ST7735(port=0, cs=1, dc=9, backlight=12, rotation=270, spi_speed_hz=10000000)
-
 # Initialize display
+time.sleep(1.0)
+st7735 = ST7735.ST7735(port=0, cs=1, dc=9, backlight=12, rotation=270, spi_speed_hz=10000000)
 st7735.begin()
-
 WIDTH = st7735.width
 HEIGHT = st7735.height
 
@@ -76,12 +68,6 @@ variables = [
     "pressure",
     "humidity",
     "light",
-    "oxidised",
-    "reduced",
-    "nh3",
-    "pm1",
-    "pm25",
-    "pm10",
 ]
 
 units = ["C", "hPa", "%", "Lux", "kO", "kO", "kO", "ug/m3", "ug/m3", "ug/m3"]
@@ -95,21 +81,11 @@ units = ["C", "hPa", "%", "Lux", "kO", "kO", "kO", "ug/m3", "ug/m3", "ug/m3"]
 # (18 .. 28]     -> Normal
 # (28 .. 35]     -> High
 # (35 .. MAX]    -> Dangerously High
-# DISCLAIMER: The limits provided here are just examples and come
-# with NO WARRANTY. The authors of this example code claim
-# NO RESPONSIBILITY if reliance on the following values or this
-# code in general leads to ANY DAMAGES or DEATH.
 limits = [
     [4, 18, 28, 35],
     [250, 650, 1013.25, 1015],
     [20, 30, 60, 70],
     [-1, -1, 30000, 100000],
-    [-1, -1, 40, 50],
-    [-1, -1, 450, 550],
-    [-1, -1, 200, 300],
-    [-1, -1, 50, 100],
-    [-1, -1, 50, 100],
-    [-1, -1, 50, 100],
 ]
 
 # RGB palette for values on the combined screen
@@ -196,7 +172,7 @@ def main():
     cpu_temps = [get_cpu_temperature()] * 5
 
     delay = 0.5  # Debounce the proximity tap
-    mode = 10  # The starting mode
+    mode = 4  # The starting mode
     last_page = 0
 
     for v in variables:
@@ -247,59 +223,6 @@ def main():
                 display_text(variables[mode], data, unit)
 
             if mode == 4:
-                # variable = "oxidised"
-                unit = "kO"
-                data = gas.read_all()
-                data = data.oxidising / 1000
-                display_text(variables[mode], data, unit)
-
-            if mode == 5:
-                # variable = "reduced"
-                unit = "kO"
-                data = gas.read_all()
-                data = data.reducing / 1000
-                display_text(variables[mode], data, unit)
-
-            if mode == 6:
-                # variable = "nh3"
-                unit = "kO"
-                data = gas.read_all()
-                data = data.nh3 / 1000
-                display_text(variables[mode], data, unit)
-
-            if mode == 7:
-                # variable = "pm1"
-                unit = "ug/m3"
-                try:
-                    data = pms5003.read()
-                except pmsReadTimeoutError:
-                    logging.warning("Failed to read PMS5003")
-                else:
-                    data = float(data.pm_ug_per_m3(1.0))
-                    display_text(variables[mode], data, unit)
-
-            if mode == 8:
-                # variable = "pm25"
-                unit = "ug/m3"
-                try:
-                    data = pms5003.read()
-                except pmsReadTimeoutError:
-                    logging.warning("Failed to read PMS5003")
-                else:
-                    data = float(data.pm_ug_per_m3(2.5))
-                    display_text(variables[mode], data, unit)
-
-            if mode == 9:
-                # variable = "pm10"
-                unit = "ug/m3"
-                try:
-                    data = pms5003.read()
-                except pmsReadTimeoutError:
-                    logging.warning("Failed to read PMS5003")
-                else:
-                    data = float(data.pm_ug_per_m3(10))
-                    display_text(variables[mode], data, unit)
-            if mode == 10:
                 # Everything on one screen
                 cpu_temp = get_cpu_temperature()
                 # Smooth out with some averaging to decrease jitter
@@ -320,21 +243,6 @@ def main():
                     raw_data = 1
                 save_data(3, raw_data)
                 display_everything()
-                gas_data = gas.read_all()
-                save_data(4, gas_data.oxidising / 1000)
-                save_data(5, gas_data.reducing / 1000)
-                save_data(6, gas_data.nh3 / 1000)
-                display_everything()
-                pms_data = None
-                try:
-                    pms_data = pms5003.read()
-                except (SerialTimeoutError, pmsReadTimeoutError):
-                    logging.warning("Failed to read PMS5003")
-                else:
-                    save_data(7, float(pms_data.pm_ug_per_m3(1.0)))
-                    save_data(8, float(pms_data.pm_ug_per_m3(2.5)))
-                    save_data(9, float(pms_data.pm_ug_per_m3(10)))
-                    display_everything()
 
     # Exit cleanly
     except KeyboardInterrupt:
