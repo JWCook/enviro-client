@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import time
+
 from bme280 import BME280
 
 try:
@@ -13,16 +14,19 @@ import logging
 logging.basicConfig(
     format='%(asctime)s.%(msecs)03d %(levelname)-8s %(message)s',
     level=logging.INFO,
-    datefmt='%Y-%m-%d %H:%M:%S')
+    datefmt='%Y-%m-%d %H:%M:%S',
+)
 
-logging.info("""compensated-temperature.py - Use the CPU temperature
+logging.info(
+    """compensated-temperature.py - Use the CPU temperature
 to compensate temperature readings from the BME280 sensor.
 Method adapted from Initial State's Enviro pHAT review:
 https://medium.com/@InitialState/tutorial-review-enviro-phat-for-raspberry-pi-4cd6d8c63441
 
 Press Ctrl+C to exit!
 
-""")
+"""
+)
 
 bus = SMBus(1)
 bme280 = BME280(i2c_dev=bus)

@@ -1,23 +1,20 @@
 import ST7735
-from PIL import Image, ImageDraw
 from enviroplus.noise import Noise
+from PIL import Image, ImageDraw
 
-print("""noise-profile.py - Get a simple noise profile.
+print(
+    """noise-profile.py - Get a simple noise profile.
 
 This example grabs a basic 3-bin noise profile of low, medium and high frequency noise, plotting the noise characteristics as coloured bars.
 
 Press Ctrl+C to exit!
 
-""")
+"""
+)
 
 noise = Noise()
 
-disp = ST7735.ST7735(
-    port=0,
-    cs=ST7735.BG_SPI_CS_FRONT,
-    dc=9,
-    backlight=12,
-    rotation=90)
+disp = ST7735.ST7735(port=0, cs=ST7735.BG_SPI_CS_FRONT, dc=9, backlight=12, rotation=90)
 
 disp.begin()
 

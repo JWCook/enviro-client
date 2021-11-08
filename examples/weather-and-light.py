@@ -3,22 +3,21 @@
 
 f"Sorry! This program requires Python >= 3.6 😅"
 
+import colorsys
 import os
 import time
+from datetime import datetime, timedelta
+
 import numpy
-import colorsys
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
-from fonts.ttf import RobotoMedium as UserFont
-
-import ST7735
-from bme280 import BME280
-from ltr559 import LTR559
-
 import pytz
-from pytz import timezone
+import ST7735
 from astral.geocoder import database, lookup
 from astral.sun import sun
-from datetime import datetime, timedelta
+from bme280 import BME280
+from fonts.ttf import RobotoMedium as UserFont
+from ltr559 import LTR559
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from pytz import timezone
 
 try:
     from smbus2 import SMBus
@@ -47,8 +46,8 @@ def circle_coordinates(x, y, radius):
 
 def map_colour(x, centre, start_hue, end_hue, day):
     """Given an x coordinate and a centre point, a start and end hue (in degrees),
-       and a Boolean for day or night (day is True, night False), calculate a colour
-       hue representing the 'colour' of that time of day."""
+    and a Boolean for day or night (day is True, night False), calculate a colour
+    hue representing the 'colour' of that time of day."""
 
     start_hue = start_hue / 360  # Rescale to between 0 and 1
     end_hue = end_hue / 360
@@ -85,7 +84,7 @@ def x_from_sun_moon_time(progress, period, x_range):
 
 def sun_moon_time(city_name, time_zone):
     """Calculate the progress through the current sun/moon period (i.e day or
-       night) from the last sunrise or sunset, given a datetime object 't'."""
+    night) from the last sunrise or sunset, given a datetime object 't'."""
 
     city = lookup(city_name, database())
 
@@ -136,7 +135,7 @@ def sun_moon_time(city_name, time_zone):
 
 def draw_background(progress, period, day):
     """Given an amount of progress through the day or night, draw the
-       background colour and overlay a blurred sun/moon."""
+    background colour and overlay a blurred sun/moon."""
 
     # x-coordinate for sun/moon
     x = x_from_sun_moon_time(progress, period, WIDTH)
@@ -219,7 +218,9 @@ def analyse_pressure(pressure, t):
         slope = line[0][0]
         intercept = line[0][1]
         variance = numpy.var(pressure_vals)
-        residuals = numpy.var([(slope * x + intercept - y) for x, y in zip(time_vals, pressure_vals)])
+        residuals = numpy.var(
+            [(slope * x + intercept - y) for x, y in zip(time_vals, pressure_vals)]
+        )
         r_squared = 1 - residuals / variance
 
         # Calculate change in pressure per hour
@@ -291,14 +292,7 @@ def describe_light(light):
 
 
 # Initialise the LCD
-disp = ST7735.ST7735(
-    port=0,
-    cs=1,
-    dc=9,
-    backlight=12,
-    rotation=270,
-    spi_speed_hz=10000000
-)
+disp = ST7735.ST7735(port=0, cs=1, dc=9, backlight=12, rotation=270, spi_speed_hz=10000000)
 
 disp.begin()
 
@@ -387,7 +381,9 @@ while True:
         range_string = f"{min_temp:.0f}-{max_temp:.0f}"
     else:
         range_string = "------"
-    img = overlay_text(img, (68, 18 + spacing), range_string, font_sm, align_right=True, rectangle=True)
+    img = overlay_text(
+        img, (68, 18 + spacing), range_string, font_sm, align_right=True, rectangle=True
+    )
     temp_icon = Image.open(f"{path}/icons/temperature.png")
     img.paste(temp_icon, (margin, 18), mask=temp_icon)
 
@@ -398,7 +394,9 @@ while True:
     img = overlay_text(img, (68, 48), humidity_string, font_lg, align_right=True)
     spacing = font_lg.getsize(humidity_string)[1] + 1
     humidity_desc = describe_humidity(corr_humidity).upper()
-    img = overlay_text(img, (68, 48 + spacing), humidity_desc, font_sm, align_right=True, rectangle=True)
+    img = overlay_text(
+        img, (68, 48 + spacing), humidity_desc, font_sm, align_right=True, rectangle=True
+    )
     humidity_icon = Image.open(f"{path}/icons/humidity-{humidity_desc.lower()}.png")
     img.paste(humidity_icon, (margin, 48), mask=humidity_icon)
 
@@ -408,7 +406,14 @@ while True:
     img = overlay_text(img, (WIDTH - margin, 18), light_string, font_lg, align_right=True)
     spacing = font_lg.getsize(light_string.replace(",", ""))[1] + 1
     light_desc = describe_light(light).upper()
-    img = overlay_text(img, (WIDTH - margin - 1, 18 + spacing), light_desc, font_sm, align_right=True, rectangle=True)
+    img = overlay_text(
+        img,
+        (WIDTH - margin - 1, 18 + spacing),
+        light_desc,
+        font_sm,
+        align_right=True,
+        rectangle=True,
+    )
     light_icon = Image.open(f"{path}/icons/bulb-{light_desc.lower()}.png")
     img.paste(humidity_icon, (80, 18), mask=light_icon)
 
@@ -420,7 +425,14 @@ while True:
     img = overlay_text(img, (WIDTH - margin, 48), pressure_string, font_lg, align_right=True)
     pressure_desc = describe_pressure(mean_pressure).upper()
     spacing = font_lg.getsize(pressure_string.replace(",", ""))[1] + 1
-    img = overlay_text(img, (WIDTH - margin - 1, 48 + spacing), pressure_desc, font_sm, align_right=True, rectangle=True)
+    img = overlay_text(
+        img,
+        (WIDTH - margin - 1, 48 + spacing),
+        pressure_desc,
+        font_sm,
+        align_right=True,
+        rectangle=True,
+    )
     pressure_icon = Image.open(f"{path}/icons/weather-{pressure_desc.lower()}.png")
     img.paste(pressure_icon, (80, 48), mask=pressure_icon)
 

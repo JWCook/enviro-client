@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 
+import time
+from subprocess import PIPE, Popen, check_output
+
 import requests
 import ST7735
-import time
 from bme280 import BME280
-from pms5003 import PMS5003, ReadTimeoutError, ChecksumMismatchError
-from subprocess import PIPE, Popen, check_output
-from PIL import Image, ImageDraw, ImageFont
 from fonts.ttf import RobotoMedium as UserFont
+from PIL import Image, ImageDraw, ImageFont
+from pms5003 import PMS5003, ChecksumMismatchError, ReadTimeoutError
 
 try:
     from smbus2 import SMBus
 except ImportError:
     from smbus import SMBus
+
 import logging
 
 <<<<<<< HEAD
@@ -23,6 +25,7 @@ import logging
 logging.basicConfig(
     format='%(asctime)s.%(msecs)03d %(levelname)-8s %(message)s',
     level=logging.INFO,
+<<<<<<< HEAD
     datefmt='%Y-%m-%d %H:%M:%S')
 <<<<<<< HEAD
 
@@ -31,8 +34,13 @@ PM2.5, and PM10 from Enviro plus and sends data to Luftdaten,
 the citizen science air quality project.
 =======
 >>>>>>> 124f49b (Update luftdaten.py)
+=======
+    datefmt='%Y-%m-%d %H:%M:%S',
+)
+>>>>>>> db1c12e (Format with black + isort)
 
-logging.info("""luftdaten.py - Reads temperature, pressure, humidity,
+logging.info(
+    """luftdaten.py - Reads temperature, pressure, humidity,
 #PM2.5, and PM10 from Enviro plus and sends data to Luftdaten,
 #the citizen science air quality project.
 
@@ -44,7 +52,8 @@ logging.info("""luftdaten.py - Reads temperature, pressure, humidity,
 
 #Press Ctrl+C to exit!
 
-#""")
+#"""
+)
 
 bus = SMBus(1)
 
@@ -52,14 +61,7 @@ bus = SMBus(1)
 bme280 = BME280(i2c_dev=bus)
 
 # Create LCD instance
-disp = ST7735.ST7735(
-    port=0,
-    cs=1,
-    dc=9,
-    backlight=12,
-    rotation=270,
-    spi_speed_hz=10000000
-)
+disp = ST7735.ST7735(port=0, cs=1, dc=9, backlight=12, rotation=270, spi_speed_hz=10000000)
 
 # Initialize display
 disp.begin()
@@ -81,7 +83,7 @@ def read_values():
         pm_values = pms5003.read()
         values["P2"] = str(pm_values.pm_ug_per_m3(2.5))
         values["P1"] = str(pm_values.pm_ug_per_m3(10))
-    except(ReadTimeoutError, ChecksumMismatchError):
+    except (ReadTimeoutError, ChecksumMismatchError):
         logging.info("Failed to read PMS5003. Reseting and retrying.")
         pms5003.reset()
         pm_values = pms5003.read()
@@ -94,7 +96,7 @@ def read_values():
 def get_cpu_temperature():
     process = Popen(['vcgencmd', 'measure_temp'], stdout=PIPE, universal_newlines=True)
     output, _error = process.communicate()
-    return float(output[output.index('=') + 1:output.rindex("'")])
+    return float(output[output.index('=') + 1 : output.rindex("'")])
 
 
 # Get Raspberry Pi serial number to use as ID
@@ -143,17 +145,14 @@ def send_to_luftdaten(values, id):
     try:
         resp_pm = requests.post(
             "https://api.luftdaten.info/v1/push-sensor-data/",
-            json={
-                "software_version": "enviro-plus 0.0.1",
-                "sensordatavalues": pm_values_json
-            },
+            json={"software_version": "enviro-plus 0.0.1", "sensordatavalues": pm_values_json},
             headers={
                 "X-PIN": "1",
                 "X-Sensor": id,
                 "Content-Type": "application/json",
-                "cache-control": "no-cache"
+                "cache-control": "no-cache",
             },
-            timeout=5
+            timeout=5,
         )
     except requests.exceptions.ConnectionError as e:
         logging.warning('Luftdaten PM Connection Error: {}'.format(e))
@@ -165,17 +164,14 @@ def send_to_luftdaten(values, id):
     try:
         resp_bmp = requests.post(
             "https://api.luftdaten.info/v1/push-sensor-data/",
-            json={
-                "software_version": "enviro-plus 0.0.1",
-                "sensordatavalues": temp_values_json
-            },
+            json={"software_version": "enviro-plus 0.0.1", "sensordatavalues": temp_values_json},
             headers={
                 "X-PIN": "11",
                 "X-Sensor": id,
                 "Content-Type": "application/json",
-                "cache-control": "no-cache"
+                "cache-control": "no-cache",
             },
-            timeout=5
+            timeout=5,
         )
     except requests.exceptions.ConnectionError as e:
         logging.warning('Luftdaten Climate Connection Error: {}'.format(e))
@@ -188,7 +184,9 @@ def send_to_luftdaten(values, id):
         if resp_pm.ok and resp_bmp.ok:
             return True
         else:
-            logging.warning('Luftdaten Error. PM: {}, Climate: {}'.format(resp_pm.reason, resp_bmp.reason))
+            logging.warning(
+                'Luftdaten Error. PM: {}, Climate: {}'.format(resp_pm.reason, resp_bmp.reason)
+            )
             return False
     else:
         return False

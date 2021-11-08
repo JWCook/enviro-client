@@ -6,12 +6,13 @@ Example run: python3 mqtt-all.py --broker 192.168.1.164 --topic enviro --usernam
 """
 
 import argparse
-import ST7735
-import time
 import ssl
+import time
+
+import ST7735
 from bme280 import BME280
-from pms5003 import PMS5003, ReadTimeoutError, SerialTimeoutError
 from enviroplus import gas
+from pms5003 import PMS5003, ReadTimeoutError, SerialTimeoutError
 
 try:
     # Transitional fix for breaking change in LTR559
@@ -21,13 +22,13 @@ try:
 except ImportError:
     import ltr559
 
-from subprocess import PIPE, Popen, check_output
-from PIL import Image, ImageDraw, ImageFont
-from fonts.ttf import RobotoMedium as UserFont
 import json
+from subprocess import PIPE, Popen, check_output
 
 import paho.mqtt.client as mqtt
 import paho.mqtt.publish as publish
+from fonts.ttf import RobotoMedium as UserFont
+from PIL import Image, ImageDraw, ImageFont
 
 try:
     from smbus2 import SMBus
@@ -65,9 +66,7 @@ def read_bme280(bme280):
     raw_temp = bme280.get_temperature()  # float
     comp_temp = raw_temp - ((cpu_temp - raw_temp) / comp_factor)
     values["temperature"] = int(comp_temp)
-    values["pressure"] = round(
-        int(bme280.get_pressure() * 100), -1
-    )  # round to nearest 10
+    values["pressure"] = round(int(bme280.get_pressure() * 100), -1)  # round to nearest 10
     values["humidity"] = int(bme280.get_humidity())
     data = gas.read_all()
     values["oxidised"] = int(data.oxidising / 1000)
@@ -96,11 +95,9 @@ def read_pms5003(pms5003):
 
 # Get CPU temperature to use for compensation
 def get_cpu_temperature():
-    process = Popen(
-        ["vcgencmd", "measure_temp"], stdout=PIPE, universal_newlines=True
-    )
+    process = Popen(["vcgencmd", "measure_temp"], stdout=PIPE, universal_newlines=True)
     output, _error = process.communicate()
-    return float(output[output.index("=") + 1:output.rindex("'")])
+    return float(output[output.index("=") + 1 : output.rindex("'")])
 
 
 # Get Raspberry Pi serial number to use as ID
@@ -146,9 +143,7 @@ def display_status(disp, mqtt_broker):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Publish enviroplus values over mqtt"
-    )
+    parser = argparse.ArgumentParser(description="Publish enviroplus values over mqtt")
     parser.add_argument(
         "--broker",
         default=DEFAULT_MQTT_BROKER_IP,
@@ -161,15 +156,14 @@ def main():
         type=int,
         help="mqtt broker port",
     )
-    parser.add_argument(
-        "--topic", default=DEFAULT_MQTT_TOPIC, type=str, help="mqtt topic"
-    )
+    parser.add_argument("--topic", default=DEFAULT_MQTT_TOPIC, type=str, help="mqtt topic")
     parser.add_argument(
         "--interval",
         default=DEFAULT_READ_INTERVAL,
         type=int,
         help="the read interval in seconds",
     )
+<<<<<<< HEAD
     parser.add_argument(
         "--tls",
         default=DEFAULT_TLS_MODE,
@@ -189,6 +183,11 @@ def main():
         type=str,
         help="mqtt password"
     )
+=======
+    parser.add_argument("--tls", default=DEFAULT_TLS_MODE, action='store_true', help="enable TLS")
+    parser.add_argument("--username", default=DEFAULT_USERNAME, type=str, help="mqtt username")
+    parser.add_argument("--password", default=DEFAULT_PASSWORD, type=str, help="mqtt password")
+>>>>>>> db1c12e (Format with black + isort)
     args = parser.parse_args()
 
     # Raspberry Pi ID
@@ -231,9 +230,7 @@ def main():
     bme280 = BME280(i2c_dev=bus)
 
     # Create LCD instance
-    disp = ST7735.ST7735(
-        port=0, cs=1, dc=9, backlight=12, rotation=270, spi_speed_hz=10000000
-    )
+    disp = ST7735.ST7735(port=0, cs=1, dc=9, backlight=12, rotation=270, spi_speed_hz=10000000)
 
     # Initialize display
     disp.begin()

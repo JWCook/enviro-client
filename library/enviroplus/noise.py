@@ -1,11 +1,9 @@
-import sounddevice
 import numpy
+import sounddevice
 
 
-class Noise():
-    def __init__(self,
-                 sample_rate=16000,
-                 duration=0.5):
+class Noise:
+    def __init__(self, sample_rate=16000, duration=0.5):
         """Noise measurement.
 
         :param sample_rate: Sample rate in Hz
@@ -45,11 +43,7 @@ class Noise():
         magnitude = numpy.abs(numpy.fft.rfft(recording[:, 0], n=self.sample_rate))
         return numpy.mean(magnitude[start:end])
 
-    def get_noise_profile(self,
-                          noise_floor=100,
-                          low=0.12,
-                          mid=0.36,
-                          high=None):
+    def get_noise_profile(self, noise_floor=100, low=0.12, mid=0.36, high=None):
         """Returns a noise charateristic profile.
 
         Bins all frequencies into 3 weighted groups expressed as a percentage of the total frequency range.
@@ -86,5 +80,5 @@ class Noise():
             samplerate=self.sample_rate,
             blocking=True,
             channels=1,
-            dtype='float64'
+            dtype='float64',
         )

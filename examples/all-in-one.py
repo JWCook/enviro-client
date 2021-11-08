@@ -1,36 +1,42 @@
 #!/usr/bin/env python3
 
-import time
 import colorsys
 import sys
+import time
+
 import ST7735
+
 try:
     # Transitional fix for breaking change in LTR559
     from ltr559 import LTR559
+
     ltr559 = LTR559()
 except ImportError:
     import ltr559
 
-from bme280 import BME280
-from pms5003 import PMS5003, ReadTimeoutError as pmsReadTimeoutError
-from enviroplus import gas
-from subprocess import PIPE, Popen
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageFont
-from fonts.ttf import RobotoMedium as UserFont
 import logging
+from subprocess import PIPE, Popen
+
+from bme280 import BME280
+from enviroplus import gas
+from fonts.ttf import RobotoMedium as UserFont
+from PIL import Image, ImageDraw, ImageFont
+from pms5003 import PMS5003
+from pms5003 import ReadTimeoutError as pmsReadTimeoutError
 
 logging.basicConfig(
     format='%(asctime)s.%(msecs)03d %(levelname)-8s %(message)s',
     level=logging.INFO,
-    datefmt='%Y-%m-%d %H:%M:%S')
+    datefmt='%Y-%m-%d %H:%M:%S',
+)
 
-logging.info("""all-in-one.py - Displays readings from all of Enviro plus' sensors
+logging.info(
+    """all-in-one.py - Displays readings from all of Enviro plus' sensors
 
 Press Ctrl+C to exit!
 
-""")
+"""
+)
 
 # BME280 temperature/pressure/humidity sensor
 bme280 = BME280()
@@ -39,14 +45,7 @@ bme280 = BME280()
 pms5003 = PMS5003()
 
 # Create ST7735 LCD display class
-st7735 = ST7735.ST7735(
-    port=0,
-    cs=1,
-    dc=9,
-    backlight=12,
-    rotation=270,
-    spi_speed_hz=10000000
-)
+st7735 = ST7735.ST7735(port=0, cs=1, dc=9, backlight=12, rotation=270, spi_speed_hz=10000000)
 
 # Initialize display
 st7735.begin()
@@ -96,7 +95,7 @@ def display_text(variable, data, unit):
 def get_cpu_temperature():
     process = Popen(['vcgencmd', 'measure_temp'], stdout=PIPE, universal_newlines=True)
     output, _error = process.communicate()
-    return float(output[output.index('=') + 1:output.rindex("'")])
+    return float(output[output.index('=') + 1 : output.rindex("'")])
 
 
 # Tuning factor for compensation. Decrease this number to adjust the
@@ -106,21 +105,23 @@ factor = 2.25
 cpu_temps = [get_cpu_temperature()] * 5
 
 delay = 0.5  # Debounce the proximity tap
-mode = 0     # The starting mode
+mode = 0  # The starting mode
 last_page = 0
 light = 1
 
 # Create a values dict to store the data
-variables = ["temperature",
-             "pressure",
-             "humidity",
-             "light",
-             "oxidised",
-             "reduced",
-             "nh3",
-             "pm1",
-             "pm25",
-             "pm10"]
+variables = [
+    "temperature",
+    "pressure",
+    "humidity",
+    "light",
+    "oxidised",
+    "reduced",
+    "nh3",
+    "pm1",
+    "pm25",
+    "pm10",
+]
 
 values = {}
 

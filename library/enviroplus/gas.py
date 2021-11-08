@@ -1,7 +1,8 @@
 """Read the MICS6814 via an ads1015 ADC"""
 
-import time
 import atexit
+import time
+
 import ads1015
 import RPi.GPIO as GPIO
 
@@ -32,11 +33,7 @@ NH3: {nh3:05.02f} Ohms"""
             fmt += """
 ADC: {adc:05.02f} Volts
 """
-        return fmt.format(
-            ox=self.oxidising,
-            red=self.reducing,
-            nh3=self.nh3,
-            adc=self.adc)
+        return fmt.format(ox=self.oxidising, red=self.reducing, nh3=self.nh3, adc=self.adc)
 
     __str__ = __repr__
 

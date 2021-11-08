@@ -12,6 +12,7 @@ check_apt = False
 
 try:
     import apt
+
     check_apt = True
 except ImportErorr:
     print("⚠️  Could not import \"apt\". Unable to verify system dependencies.")
@@ -26,7 +27,7 @@ apt_deps = {
     "python3-cffi",
     "python3-spidev",
     "python3-rpi.gpio",
-    "libportaudio2"
+    "libportaudio2",
 }
 
 deps = {
@@ -40,7 +41,7 @@ deps = {
     "astral": None,
     "pytz": None,
     "sounddevice": None,
-    "paho.mqtt": None
+    "paho.mqtt": None,
 }
 
 config = {
@@ -48,7 +49,7 @@ config = {
     "dtparam=spi=on",
     "dtoverlay=adau7002-simple",
     "dtoverlay=pi3-miniuart-bt",
-    "enable_uart=1"
+    "enable_uart=1",
 }
 
 if check_apt:
@@ -85,6 +86,7 @@ print("\nSystem config...")
 
 config_txt = open(CONFIG_FILE, "r").read().split("\n")
 
+
 def check_config(line):
     global errors
     print(f"  Checking for {line} in {CONFIG_FILE}: ", end="")
@@ -94,6 +96,7 @@ def check_config(line):
             return
     print("⚠️  Missing!")
     errors += 1
+
 
 for line in config:
     check_config(line)

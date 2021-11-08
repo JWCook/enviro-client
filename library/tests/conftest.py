@@ -3,6 +3,7 @@ These allow the mocking of various Python modules
 that might otherwise have runtime side-effects.
 """
 import sys
+
 import mock
 import pytest
 from i2cdevice import MockSMBus
@@ -11,13 +12,13 @@ from i2cdevice import MockSMBus
 class SMBusFakeDevice(MockSMBus):
     def __init__(self, i2c_bus):
         MockSMBus.__init__(self, i2c_bus)
-        self.regs[0x00:0x01] = 0x0f, 0x00
+        self.regs[0x00:0x01] = 0x0F, 0x00
 
 
 class SMBusFakeDeviceNoTimeout(MockSMBus):
     def __init__(self, i2c_bus):
         MockSMBus.__init__(self, i2c_bus)
-        self.regs[0x00:0x01] = 0x0f, 0x80
+        self.regs[0x00:0x01] = 0x0F, 0x80
 
 
 @pytest.fixture(scope='function', autouse=True)

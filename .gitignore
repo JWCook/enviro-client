@@ -18,4 +18,5 @@ library/debian/
 .coverage
 .pytest_cache
 .tox
+.vim/
 .vscode/
