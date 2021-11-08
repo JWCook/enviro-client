@@ -32,6 +32,7 @@ CPU_TEMP_FACTOR = 2.25
 # Sensors
 bme280 = BME280()  # BME280 temperature/pressure/humidity sensor
 ltr559 = LTR559()  # LTR559 light/proximity sensor
+noise = Noise()  # ADS1015 noise sensor
 
 # Initialize display
 sleep(1.0)
@@ -55,6 +56,7 @@ metrics = {
     'pressure': 'hPa',
     'humidity': '%',
     'light': 'Lux',
+    'noise': 'dB',
 }
 values = {}
 
@@ -72,6 +74,7 @@ limits = [
     [250, 650, 1013.25, 1015],
     [20, 30, 60, 70],
     [-1, -1, 30000, 100000],
+    [10, 20, 65, 85],
 ]
 
 # RGB palette for values on the combined screen
@@ -163,71 +166,109 @@ def get_cpu_temperature():
     return float(output[output.index('=') + 1 : output.rindex("'")])
 
 
+def get_ambient_noise():
+    measurements = noise.get_noise_profile()
+    return measurements[-1] * 128
+
+
+def show_noise_profile(disp, draw, img):
+    """Show a simple noise profile.
+
+    This example grabs a basic 3-bin noise profile of low, medium and high frequency noise, plotting the noise characteristics as colored bars.
+    """
+    low, mid, high, amp = noise.get_noise_profile()
+
+    img2 = img.copy()
+    draw.rectangle((0, 0, disp.width, disp.height), (0, 0, 0))
+    img.paste(img2, (1, 0))
+    draw.line(
+        (0, 0, 0, amp * 64),
+        fill=(int(low * 128), int(mid * 128), int(high * 128)),
+    )
+
+    disp.display(img)
+
+
+def check_mode(mode, last_page):
+    """If the proximity crosses the threshold, toggle the mode"""
+    proximity = ltr559.get_proximity()
+    if proximity > 1500 and time() - last_page > PROX_DELAY:
+        mode += 1
+        mode %= len(metrics) + 1
+        last_page = time()
+    return mode, proximity
+
+
+def draw_frame(mode, last_page, cpu_temp_history):
+    mode, proximity = check_mode(mode, last_page)
+
+    # Temperature
+    if mode == 0:
+        data = get_temperature(cpu_temp_history)
+        display_text(mode, data)
+
+    # Pressure
+    elif mode == 1:
+        data = bme280.get_pressure()
+        display_text(mode, data)
+
+    # Humidity
+    elif mode == 2:
+        data = bme280.get_humidity()
+        display_text(mode, data)
+
+    # Light
+    elif mode == 3:
+        data = ltr559.get_lux() if proximity < 10 else 1
+        display_text(mode, data)
+
+    # Noise
+    elif mode == 4:
+        data = get_ambient_noise()
+        display_text(mode, data)
+
+    # Everything on one screen
+    elif mode == 5:
+        # Temperature; Smooth out with some averaging to decrease jitter
+        data = get_temperature(cpu_temp_history)
+        save_data(0, data)
+        display_everything()
+
+        # Pressure
+        data = bme280.get_pressure()
+        save_data(1, data)
+        display_everything()
+
+        # Humidity
+        data = bme280.get_humidity()
+        save_data(2, data)
+        display_everything()
+
+        # Light
+        if proximity < 10:
+            data = ltr559.get_lux()
+        else:
+            data = 1
+        save_data(3, data)
+        display_everything()
+
+        # Noise
+        data = get_ambient_noise()
+        save_data(4, data)
+        display_everything()
+
+
 def main():
     cpu_temp_history = [get_cpu_temperature()] * 5
-    delay = 0.5  # Debounce the proximity tap
-    mode = 4  # The starting mode
+    mode = 5
     last_page = 0
-
     for v in metrics:
         values[v] = [1] * WIDTH
 
-    # The main loop
     try:
         while True:
-            proximity = ltr559.get_proximity()
-
-            # If the proximity crosses the threshold, toggle the mode
-            if proximity > 1500 and time() - last_page > delay:
-                mode += 1
-                mode %= len(metrics) + 1
-                last_page = time()
-
-            # Temperature
-            if mode == 0:
-                data = get_temperature(cpu_temp_history)
-                display_text(mode, data)
-
-            # Pressure
-            elif mode == 1:
-                data = bme280.get_pressure()
-                display_text(mode, data)
-
-            # Humidity
-            elif mode == 2:
-                data = bme280.get_humidity()
-                display_text(mode, data)
-
-            # Light
-            elif mode == 3:
-                data = ltr559.get_lux() if proximity < 10 else 1
-                display_text(mode, data)
-
-            # Everything on one screen
-            elif mode == 4:
-                # Temperature; Smooth out with some averaging to decrease jitter
-                data = get_temperature(cpu_temp_history)
-                save_data(0, data)
-                display_everything()
-
-                # Pressure
-                raw_data = bme280.get_pressure()
-                save_data(1, raw_data)
-                display_everything()
-
-                # Humidity
-                raw_data = bme280.get_humidity()
-                save_data(2, raw_data)
-
-                # Light
-                if proximity < 10:
-                    raw_data = ltr559.get_lux()
-                else:
-                    raw_data = 1
-                save_data(3, raw_data)
-                display_everything()
-
-    # Exit cleanly
+            draw_frame(mode, last_page, cpu_temp_history)
+            sleep(0.5)
     except KeyboardInterrupt:
         sys.exit(0)
 
