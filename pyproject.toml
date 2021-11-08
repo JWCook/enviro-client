@@ -6,17 +6,18 @@ authors = []
 
 [tool.poetry.dependencies]
 python = "^3.7"
-ads1015 = ">=0.0.7" # Sound
 ltr559 = ">=0.1.1" # Light/proximity
 pimoroni-bme280 = ">=0.1.1" # Humidity
-st7735 = "*" # LCD
+st7735 = ">=0.0.4" # LCD
 # enviroplus = ">=0.0.5"
+attrs = ">=21.2"
+numpy = {version = "^1.21.4", python = "<3.11"}
 pillow = "^8.0"
 fonts = "*"
 font-roboto = "*"
+sounddevice = "^0.4.3"
 # astral
 # pytz
-sounddevice = "^0.4.3"
 # paho-mqtt
 
 [tool.poetry.dev-dependencies]

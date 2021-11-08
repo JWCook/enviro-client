@@ -1,8 +1,9 @@
-#!/usr/bin/env python)3
+#!/usr/bin/env python3
 
 import colorsys
 import logging
 import sys
+from queue import Queue
 from subprocess import PIPE, Popen
 from time import sleep, time
 
@@ -44,14 +45,14 @@ HEIGHT = st7735.height
 # Set up canvas and font
 img = Image.new('RGB', (WIDTH, HEIGHT), color=(0, 0, 0))
 draw = ImageDraw.Draw(img)
-font_size_small = 10
-font_size_large = 20
-font = ImageFont.truetype(UserFont, font_size_large)
-smallfont = ImageFont.truetype(UserFont, font_size_small)
-x_offset = 2
-y_offset = 2
+FONT_SIZE = 20
+FONT_SIZE_SMALL = 10
+FONT = ImageFont.truetype(UserFont, FONT_SIZE)
+FONT_SMALL = ImageFont.truetype(UserFont, FONT_SIZE_SMALL)
+X_OFFSET = 2
+Y_OFFSET = 2
 
-metrics = {
+METRICS = {
     'temperature': 'C',
     'pressure': 'hPa',
     'humidity': '%',
@@ -69,7 +70,7 @@ values = {}
 # (18 .. 28]     -> Normal
 # (28 .. 35]     -> High
 # (35 .. MAX]    -> Dangerously High
-limits = [
+LIMITS = [
     [4, 18, 28, 35],
     [250, 650, 1013.25, 1015],
     [20, 30, 60, 70],
@@ -78,7 +79,7 @@ limits = [
 ]
 
 # RGB palette for values on the combined screen
-palette = [
+PALETTE = [
     (0, 0, 255),  # Dangerously Low
     (0, 255, 255),  # Low
     (0, 255, 0),  # Normal
@@ -89,8 +90,8 @@ palette = [
 
 # Displays data and text on the 0.96' LCD
 def display_text(idx, data):
-    metric = list(metrics)[idx]
-    unit = metrics[metric]
+    metric = list(METRICS)[idx]
+    unit = METRICS[metric]
     message = f'{metric}: {data:.1f} {unit}'
     logging.info(message)
 
@@ -112,7 +113,7 @@ def display_text(idx, data):
         draw.rectangle((i, line_y, i + 1, line_y + 1), (0, 0, 0))
 
     # Write the text at the top in black
-    draw.text((0, 0), message, font=font, fill=(0, 0, 0))
+    draw.text((0, 0), message, font=FONT, fill=(0, 0, 0))
     st7735.display(img)
 
 
@@ -123,8 +124,8 @@ def to_rgb(color):
 
 # Saves the data to be used in the graphs later and prints to the log
 def save_data(idx, data):
-    metric = list(metrics)[idx]
-    unit = metrics[metric]
+    metric = list(METRICS)[idx]
+    unit = METRICS[metric]
     # Maintain length of list
     values[metric] = values[metric][1:] + [data]
     logging.info(f'{metric}: {data:.1f} {unit}')
@@ -133,19 +134,21 @@ def save_data(idx, data):
 # Displays all the text on the 0.96' LCD
 def display_everything():
     draw.rectangle((0, 0, WIDTH, HEIGHT), (0, 0, 0))
-    row_count = len(metrics) / COLUMN_COUNT
-    for i, (metric, unit) in enumerate(metrics.items()):
+    row_count = len(METRICS) / COLUMN_COUNT
+    row_size = HEIGHT / row_count
+    col_size = WIDTH // COLUMN_COUNT
+    for i, (metric, unit) in enumerate(METRICS.items()):
         data_value = values[metric][-1]
-        x = x_offset + ((WIDTH // COLUMN_COUNT) * (i // row_count))
-        y = y_offset + ((HEIGHT / row_count) * (i % row_count))
+        x = X_OFFSET + (col_size * (i // row_count))
+        y = Y_OFFSET + (row_size * (i % row_count))
 
-        rgb = palette[0]
-        for j, lim in enumerate(limits[i]):
+        rgb = PALETTE[0]
+        for j, lim in enumerate(LIMITS[i]):
             if data_value > lim:
-                rgb = palette[j + 1]
+                rgb = PALETTE[j + 1]
 
         message = f'{metric[:4]}: {data_value:.1f} {unit}'
-        draw.text((x, y), message, font=smallfont, fill=rgb)
+        draw.text((x, y), message, font=FONT_SMALL, fill=rgb)
 
     st7735.display(img)
 
@@ -194,13 +197,13 @@ def check_mode(mode, last_page):
     proximity = ltr559.get_proximity()
     if proximity > 1500 and time() - last_page > PROX_DELAY:
         mode += 1
-        mode %= len(metrics) + 1
+        mode %= len(METRICS) + 1
         last_page = time()
-    return mode, proximity
+    return mode, proximity, last_page
 
 
 def draw_frame(mode, last_page, cpu_temp_history):
-    mode, proximity = check_mode(mode, last_page)
+    mode, proximity, last_page = check_mode(mode, last_page)
 
     # Temperature
     if mode == 0:
@@ -262,7 +265,7 @@ def main():
     cpu_temp_history = [get_cpu_temperature()] * 5
     mode = 5
     last_page = 0
-    for v in metrics:
+    for v in METRICS:
         values[v] = [1] * WIDTH
 
     try:
