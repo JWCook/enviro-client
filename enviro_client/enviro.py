@@ -1,8 +1,8 @@
 from logging import getLogger
 from typing import Optional, Tuple
 
-from enviro_client.display import Display
-from enviro_client.sensors import (
+from enviro_client import (
+    Display,
     HumiditySensor,
     LightSensor,
     NoiseSensor,
