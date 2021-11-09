@@ -11,7 +11,7 @@ from numpy import digitize
 
 # Sensor settings
 CPU_TEMP_FACTOR = 2.25  # Factor for compensation of CPU temperature
-HISTORY_LEN = 5  # Number of sensor readings to keep in history
+HISTORY_LEN = 5  # Default number of sensor readings to keep in history
 PROXIMITY_DELAY = 0.5  # Proximity sensor delay for cycling modes
 
 # RGB palette for coloring values by "bin"
@@ -33,8 +33,8 @@ class Sensor:
     value: float
     history: deque[float]
 
-    def __init__(self):
-        self.history = deque([0] * HISTORY_LEN, maxlen=HISTORY_LEN)
+    def __init__(self, history_len: int = HISTORY_LEN):
+        self.history = deque([0] * history_len, maxlen=history_len)
 
     @property
     def value(self) -> float:
@@ -81,8 +81,8 @@ class TemperatureSensor(Sensor):
     unit = 'C'
     bins = (4, 18, 28, 35)
 
-    def __init__(self, bme280: BME280 = None):
-        super().__init__()
+    def __init__(self, *args, bme280: BME280 = None, **kwargs):
+        super().__init__(*args, **kwargs)
         self.cpu_temp = CPUTemperatureSensor()
         self.bme280 = bme280 or BME280()
 
@@ -99,8 +99,8 @@ class HumiditySensor(Sensor):
     unit = '%'
     bins = (20, 30, 60, 70)
 
-    def __init__(self, bme280: BME280 = None):
-        super().__init__()
+    def __init__(self, *args, bme280: BME280 = None, **kwargs):
+        super().__init__(*args, **kwargs)
         self.bme280 = bme280 or BME280()
 
     def raw_read(self) -> float:
@@ -112,8 +112,8 @@ class PressureSensor(Sensor):
     unit = 'hPa'
     bins = (250, 650, 1013.25, 1015)
 
-    def __init__(self, bme280: BME280 = None):
-        super().__init__()
+    def __init__(self, *args, bme280: BME280 = None, **kwargs):
+        super().__init__(*args, **kwargs)
         self.bme280 = bme280 or BME280()
 
     def raw_read(self) -> float:
@@ -125,8 +125,8 @@ class LightSensor(Sensor):
     unit = 'Lux'
     bins = (-1, -1, 30000, 100000)
 
-    def __init__(self, ltr559: LTR559 = None):
-        super().__init__()
+    def __init__(self, *args, ltr559: LTR559 = None, **kwargs):
+        super().__init__(*args, **kwargs)
         self.ltr559 = ltr559 or LTR559()
 
     def raw_read(self) -> float:
@@ -139,8 +139,8 @@ class ProximitySensor(Sensor):
     bins = (-1, 10, 100, 1500)
     last_page: float
 
-    def __init__(self, ltr559: LTR559 = None):
-        super().__init__()
+    def __init__(self, *args, ltr559: LTR559 = None, **kwargs):
+        super().__init__(*args, **kwargs)
         self.ltr559 = ltr559 or LTR559()
         self.last_page = time()
 
@@ -162,8 +162,8 @@ class NoiseSensor(Sensor):
     unit = 'dB'
     bins = (10, 20, 65, 85)
 
-    def __init__(self, noise: Noise = None):
-        super().__init__()
+    def __init__(self, *args, noise: Noise = None, **kwargs):
+        super().__init__(*args, **kwargs)
         self.noise = noise or Noise()
 
     def raw_read(self) -> float:
