@@ -10,6 +10,7 @@ readme = "README.md"
 python = "^3.9"
 font-roboto = "*"
 fonts = "*"
+loguru = "^0.5"
 ltr559 = ">=0.1.1"
 numpy = {version = "^1.21.4", python = "<3.11"}
 pillow = "^8.0"

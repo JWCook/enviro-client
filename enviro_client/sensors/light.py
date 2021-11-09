@@ -21,6 +21,7 @@ class LightSensor(Sensor):
         super().__init__(*args, **kwargs)
         self.ltr559 = ltr559 or LTR559()
 
+    # TODO: take proximity into account?
     def raw_read(self) -> float:
         return self.ltr559.get_lux()  # if proximity < 10 else 1
 

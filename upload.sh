@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-scp -r $(pwd) rpi:~/enviro-client
+scp -rp $(pwd)/enviro_client/ rpi:~/enviro-client/

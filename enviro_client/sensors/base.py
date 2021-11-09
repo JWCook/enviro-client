@@ -1,8 +1,8 @@
 from abc import abstractmethod
 from collections import deque
-from logging import getLogger
 from typing import Tuple
 
+from loguru import logger
 from numpy import digitize
 
 # Default number of sensor readings to keep in history
@@ -28,6 +28,7 @@ class Sensor:
     history: deque[float]
 
     def __init__(self, history_len: int = HISTORY_LEN):
+        logger.debug(f'Initializing {self.__class__.__name__}')
         self.history = deque([0] * history_len, maxlen=history_len)
 
     @property

@@ -1,5 +1,6 @@
-from logging import getLogger
 from typing import Optional, Tuple
+
+from loguru import logger
 
 from enviro_client import (
     Display,
@@ -12,11 +13,10 @@ from enviro_client import (
     TemperatureSensor,
 )
 
-logger = getLogger(__name__)
-
 
 class Enviro:
     def __init__(self):
+        logger.debug("Initializing display and sensors")
         self.display = Display(n_metrics=5)
         self.proximity = ProximitySensor()
         self.mode = 0

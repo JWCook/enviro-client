@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-from logging import basicConfig, getLogger
 from time import sleep
 
-from enviro_client import Enviro
+from loguru import logger
 
-basicConfig(level='INFO')
-logger = getLogger(__name__)
+from enviro_client import Enviro
 
 
 def display_text(sensor, enviro):

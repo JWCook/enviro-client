@@ -1,6 +1,7 @@
 from colorsys import hsv_to_rgb
 
 from fonts.ttf import RobotoMedium as UserFont
+from loguru import logger
 from PIL import Image, ImageDraw, ImageFont
 from ST7735 import ST7735
 
@@ -28,7 +29,7 @@ class Display(ST7735):
             spi_speed_hz=10000000,
             **kwargs,
         )
-        self.begin()
+        logger.debug(f'Initializing {self.width}x{self.height} display')
         self.img = Image.new('RGB', (self.width, self.height), color=(0, 0, 0))
         self.draw = ImageDraw.Draw(self.img)
 
