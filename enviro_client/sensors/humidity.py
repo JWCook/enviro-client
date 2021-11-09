@@ -1,4 +1,7 @@
-"""Interface for BME280 humidity, pressure, and temperature sensor"""
+"""Interface for the
+[BME280](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/)
+humidity, pressure, and temperature sensor
+"""
 import subprocess
 
 from bme280 import BME280

@@ -1,4 +1,7 @@
-"""Interface for LTR559 light/proximity sensor"""
+"""Interface for the
+[LTR559](https://shop.pimoroni.com/products/ltr-559-light-proximity-sensor-breakout)
+light/proximity sensor
+"""
 from time import time
 
 from ltr559 import LTR559

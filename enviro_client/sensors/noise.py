@@ -1,4 +1,7 @@
-"""Interface for Enviro noise sensor.
+"""Interface for the
+[SPH0645LM4H-B](https://www.knowles.com/docs/default-source/default-document-library/sph0645lm4h-1-datasheet.pdf)
+microphone, for basic use as an ambient noise sensor.
+
 Adapted from: https://github.com/pimoroni/enviroplus-python/blob/master/library/enviroplus/noise.py
 """
 import numpy as np

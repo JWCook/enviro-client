@@ -18,7 +18,7 @@ BIN_COLORS = [
 
 
 class Sensor:
-    """Representation of the state and metadata of a single sensor metric"""
+    """Base class for representing the state and metadata of a single sensor metric"""
 
     name: str
     unit: str

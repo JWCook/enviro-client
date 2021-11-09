@@ -2,7 +2,7 @@
 name = "enviro-client"
 version = "0.0.1"
 description = "Enviro monitoring add-on for Raspberry Pi"
-authors = ["Jordan Cook"]
+authors = ["'Phil Howard' <phil@gadgetoid.com>", "Jordan Cook"]
 license = "MIT"
 readme = "README.md"
 
