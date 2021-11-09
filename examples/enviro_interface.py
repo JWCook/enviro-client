@@ -8,11 +8,11 @@ from collections import deque
 from time import sleep, time
 from typing import Tuple
 
-from attr import define, field
 from bme280 import BME280
 from enviroplus.noise import Noise
 from fonts.ttf import RobotoMedium as UserFont
 from ltr559 import LTR559
+from numpy import digitize
 from PIL import Image, ImageDraw, ImageFont
 from ST7735 import ST7735
 
@@ -37,8 +37,8 @@ FONT_SMALL = ImageFont.truetype(UserFont, FONT_SIZE_SMALL)
 X_OFFSET = 2
 Y_OFFSET = 2
 
-# RGB palette for values on the combined screen
-PALETTE = [
+# RGB palette for coloring values by "bin"
+BIN_COLORS = [
     (0, 0, 255),  # Very Low
     (0, 255, 255),  # Low
     (0, 255, 0),  # Normal
@@ -52,7 +52,7 @@ class Sensor:
 
     name: str
     unit: str
-    limits: Tuple[int, int, int, int]
+    bins: Tuple[int, int, int, int]
     value: float
     history: deque[float]
 
@@ -76,11 +76,11 @@ class Sensor:
         return sum(self.history) / len(self.history)
 
     def color(self) -> Tuple[int, int, int]:
-        color = PALETTE[0]
-        for i, lim in enumerate(self.limits):
-            if self.value > lim:
-                color = PALETTE[i + 1]
-        return color
+        """Get an RGB value corresponding to the current sensor value.
+        Note: ``bins`` defines value ranges, and ``BIN_COLORS`` defines correponding colors.
+        """
+        color_idx = digitize(self.value, self.bins)
+        return BIN_COLORS[color_idx]
 
     def __str__(self):
         return f'{self.name}: {self.value:.1f} {self.unit}'
@@ -89,7 +89,7 @@ class Sensor:
 class CPUTemperatureSensor(Sensor):
     name = 'temperature'
     unit = 'C'
-    limits = (4, 18, 28, 35)
+    bins = (4, 18, 28, 35)
 
     def raw_read(self):
         """Get the temperature of the CPU for compensation"""
@@ -102,7 +102,7 @@ class CPUTemperatureSensor(Sensor):
 class TemperatureSensor(Sensor):
     name = 'temperature'
     unit = 'C'
-    limits = (4, 18, 28, 35)
+    bins = (4, 18, 28, 35)
 
     def __init__(self, bme280: BME280 = None):
         super().__init__()
@@ -120,7 +120,7 @@ class TemperatureSensor(Sensor):
 class HumiditySensor(Sensor):
     name = 'humidity'
     unit = '%'
-    limits = (20, 30, 60, 70)
+    bins = (20, 30, 60, 70)
 
     def __init__(self, bme280: BME280 = None):
         super().__init__()
@@ -133,7 +133,7 @@ class HumiditySensor(Sensor):
 class PressureSensor(Sensor):
     name = 'pressure'
     unit = 'hPa'
-    limits = (250, 650, 1013.25, 1015)
+    bins = (250, 650, 1013.25, 1015)
 
     def __init__(self, bme280: BME280 = None):
         super().__init__()
@@ -146,7 +146,7 @@ class PressureSensor(Sensor):
 class LightSensor(Sensor):
     name = 'light'
     unit = 'Lux'
-    limits = (-1, -1, 30000, 100000)
+    bins = (-1, -1, 30000, 100000)
 
     def __init__(self, ltr559: LTR559 = None):
         super().__init__()
@@ -159,12 +159,13 @@ class LightSensor(Sensor):
 class ProximitySensor(Sensor):
     name = 'proximity'
     unit = 'mm'
-    limits = (-1, 10, 100, 1500)
-    last_page: float = field(default=0)
+    bins = (-1, 10, 100, 1500)
+    last_page: float
 
     def __init__(self, ltr559: LTR559 = None):
         super().__init__()
         self.ltr559 = ltr559 or LTR559()
+        self.last_page = time()
 
     def raw_read(self) -> float:
         return self.ltr559.get_proximity()
@@ -182,7 +183,7 @@ class ProximitySensor(Sensor):
 class NoiseSensor(Sensor):
     name = 'noise'
     unit = 'dB'
-    limits = (10, 20, 65, 85)
+    bins = (10, 20, 65, 85)
 
     def __init__(self, noise: Noise = None):
         super().__init__()
