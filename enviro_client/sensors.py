@@ -1,41 +1,18 @@
-#!/usr/bin/env python3
-
-import colorsys
-import logging
 import subprocess
 from abc import abstractmethod
 from collections import deque
-from time import sleep, time
+from time import time
 from typing import Tuple
 
 from bme280 import BME280
 from enviroplus.noise import Noise
-from fonts.ttf import RobotoMedium as UserFont
 from ltr559 import LTR559
 from numpy import digitize
-from PIL import Image, ImageDraw, ImageFont
-from ST7735 import ST7735
-
-logging.basicConfig(level='INFO')
-logger = logging.getLogger(__name__)
-
 
 # Sensor settings
 CPU_TEMP_FACTOR = 2.25  # Factor for compensation of CPU temperature
 HISTORY_LEN = 5  # Number of sensor readings to keep in history
 PROXIMITY_DELAY = 0.5  # Proximity sensor delay for cycling modes
-
-# Display settings
-COLUMN_COUNT = 1  # Display columns for 'combined' mode
-TOP_POS = 25  # Position of the top bar
-
-# Font settings
-FONT_SIZE = 20
-FONT_SIZE_SMALL = 10
-FONT = ImageFont.truetype(UserFont, FONT_SIZE)
-FONT_SMALL = ImageFont.truetype(UserFont, FONT_SIZE_SMALL)
-X_OFFSET = 2
-Y_OFFSET = 2
 
 # RGB palette for coloring values by "bin"
 BIN_COLORS = [
@@ -192,74 +169,3 @@ class NoiseSensor(Sensor):
     def raw_read(self) -> float:
         measurements = self.noise.get_noise_profile()
         return measurements[-1] * 128
-
-
-class Display(ST7735):
-    def __init__(self, **kwargs):
-        super().__init__(
-            port=0, cs=1, dc=9, backlight=12, rotation=270, spi_speed_hz=10000000, **kwargs
-        )
-        self.begin()
-        self.img = Image.new('RGB', (self.width, self.height), color=(0, 0, 0))
-        self.draw = ImageDraw.Draw(self.img)
-
-    def new_frame(self):
-        self.draw.rectangle(
-            (0, 0, self.width, self.height),
-            (0, 0, 0),
-        )
-
-    def draw_frame(self):
-        self.display(self.img)
-
-    def add_metric(self, x, y, text, color):
-        self.draw.text((x, y), text, fill=color, font=FONT_SMALL)
-
-
-class Enviro:
-    def __init__(self):
-        # Reuse sensor interfaces used for multiple metrics
-        bme280 = BME280()
-        ltr559 = LTR559()
-
-        self.sensors: Tuple[Sensor] = (
-            TemperatureSensor(bme280=bme280),
-            PressureSensor(bme280=bme280),
-            HumiditySensor(bme280=bme280),
-            LightSensor(ltr559=ltr559),
-            NoiseSensor(),
-        )
-
-        self.proximity = ProximitySensor(ltr559=ltr559)
-        self.mode = 0
-
-        sleep(0.5)
-        self.display = Display()
-
-
-# Displays all the text on the 0.96' LCD
-def display_everything(enviro: Enviro):
-    enviro.display.new_frame()
-    row_count = len(enviro.sensors) / COLUMN_COUNT
-    row_size = enviro.display.height / row_count
-    col_size = int(enviro.display.width / COLUMN_COUNT)
-
-    for i, sensor in enumerate(enviro.sensors):
-        x = X_OFFSET + (col_size * (i // row_count))
-        y = Y_OFFSET + (row_size * (i % row_count))
-
-        sensor.read()
-        enviro.display.add_metric(x, y, str(sensor), sensor.color())
-        logger.info(str(sensor))
-
-    enviro.display.draw_frame()
-
-
-if __name__ == '__main__':
-    enviro = Enviro()
-    try:
-        while True:
-            display_everything(enviro)
-            sleep(0.5)
-    except KeyboardInterrupt:
-        exit(0)

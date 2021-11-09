@@ -1,23 +1,57 @@
-build/
-_build/
-*.o
-*.so
-*.a
 *.py[cod]
+downloads/
+
+# Packages
+*.egg
 *.egg-info
-dist/
-__pycache__
-.DS_Store
-*.deb
-*.dsc
-*.build
-*.changes
-*.orig.*
-packaging/*tar.xz
-library/debian/
-.coverage
-.pytest_cache
-.tox
+.installed.cfg
+.mypy_cache/
 .venv
+bin
+build
+develop-eggs
+dist
+eggs
+lib
+lib64
+parts
+sdist
+var
+venv/
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+test-reports/
+
+# Complexity
+output/*.html
+output/*/index.html
+
+# Sphinx
+docs/_build/
+docs/api/
+docs/docs/
+docs/examples
+docs/sample_data
+docs/models/
+docs/modules/
+
+# Mac OS X
+.DS_Store
+
+# Request cache
+*.sqlite
+*.db
+
+# Editors
+.~*
+.idea/
+.ipynb_checkpoints/
+.tmp
 .vim/
 .vscode/
