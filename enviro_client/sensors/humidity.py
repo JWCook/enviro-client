@@ -61,7 +61,7 @@ class TemperatureSensor(Sensor):
 
     def __init__(self, *args, bme280: BME280 = None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.cpu_temp = CPUTemperatureSensor()
+        self.cpu_temp = CPUTemperatureSensor(history_len=5)
         self.bme280 = bme280 or BME280()
 
     def raw_read(self):

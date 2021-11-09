@@ -21,13 +21,13 @@ class Enviro:
         self.proximity = ProximitySensor()
         self.mode = 0
 
-        temp = TemperatureSensor(self.display.width)
+        temp = TemperatureSensor()
         self.sensors: Tuple[Sensor] = (
             temp,
-            PressureSensor(self.display.width, bme280=temp.bme280),
-            HumiditySensor(self.display.width, bme280=temp.bme280),
-            LightSensor(self.display.width, ltr559=self.proximity.ltr559),
-            NoiseSensor(self.display.width),
+            PressureSensor(bme280=temp.bme280),
+            HumiditySensor(bme280=temp.bme280),
+            LightSensor(ltr559=self.proximity.ltr559),
+            NoiseSensor(),
         )
 
     def check_mode(self) -> int:

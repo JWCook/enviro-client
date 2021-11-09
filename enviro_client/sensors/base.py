@@ -1,11 +1,12 @@
 from abc import abstractmethod
 from collections import deque
+from logging import getLogger
 from typing import Tuple
 
 from numpy import digitize
 
 # Default number of sensor readings to keep in history
-HISTORY_LEN = 5
+HISTORY_LEN = 160
 
 # RGB palette for coloring values by "bin"
 BIN_COLORS = [
