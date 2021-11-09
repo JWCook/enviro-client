@@ -9,20 +9,15 @@ from enviro_client import Enviro
 def display_text(sensor, enviro):
     sensor.read()
     logger.info(str(sensor))
-
-    # Scale the values for the metric between 0 and 1
-    vmin = min(sensor.history)
-    vmax = max(sensor.history)
-    colors = [(v - vmin + 1) / (vmax - vmin + 1) for v in sensor.history]
-    enviro.display.draw_text(str(sensor), colors)
+    enviro.display.draw_graph(str(sensor), sensor.history)
 
 
 def show_all_metrics(enviro: Enviro):
     enviro.display.new_frame()
 
-    for idx, sensor in enumerate(enviro.sensors):
+    for sensor in enviro.sensors:
         sensor.read()
-        enviro.display.add_metric(idx, str(sensor), sensor.color())
+        enviro.display.draw_metric_text(str(sensor), sensor.color())
         logger.info(str(sensor))
 
     enviro.display.draw_frame()
@@ -36,7 +31,7 @@ if __name__ == '__main__':
                 display_text(active_sensor, enviro)
             else:
                 show_all_metrics(enviro)
-            sleep(0.5)
+            sleep(0.25)
     except KeyboardInterrupt:
         enviro.display.new_frame()
         exit(0)
