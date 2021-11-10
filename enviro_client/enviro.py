@@ -46,3 +46,11 @@ class Enviro:
     def read_all(self) -> None:
         """Read all sensors and display them on the display"""
         return {sensor.name: sensor.read() for sensor in self.sensors}
+
+    def get_device_id(self) -> str:
+        """Get Raspberry Pi serial number"""
+        with open("/proc/cpuinfo", "r") as f:
+            for line in f:
+                if line.startswith('Serial'):
+                    return line.split(':')[1].strip()
+        return 'N/A'

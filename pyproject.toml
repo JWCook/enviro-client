@@ -13,6 +13,7 @@ fonts = "*"
 loguru = "^0.5"
 ltr559 = ">=0.1.1"
 numpy = {version = "^1.21.4", python = "<3.11"}
+paho-mqtt = "^1.6"
 pillow = "^8.0"
 pimoroni-bme280 = ">=0.1.1"
 pyyaml = "^6.0"
@@ -20,7 +21,6 @@ sounddevice = "^0.4.3"
 st7735 = ">=0.0.4"
 # astral
 # pytz
-# paho-mqtt
 
 [tool.poetry.dev-dependencies]
 black = "^21.10b0"
