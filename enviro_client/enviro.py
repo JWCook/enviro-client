@@ -42,3 +42,7 @@ class Enviro:
         """Return the currently selected sensor (if any)"""
         mode = self.check_mode()
         return self.sensors[mode - 1] if mode > 0 else None
+
+    def read_all(self) -> None:
+        """Read all sensors and display them on the display"""
+        return {sensor.name: sensor.read() for sensor in self.sensors}

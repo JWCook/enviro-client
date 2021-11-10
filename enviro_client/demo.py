@@ -33,5 +33,5 @@ if __name__ == '__main__':
                 show_all_metrics(enviro)
             sleep(0.25)
     except KeyboardInterrupt:
-        enviro.display.new_frame()
+        enviro.display.set_backlight(0)
         exit(0)
