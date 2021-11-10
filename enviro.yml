@@ -1,0 +1,8 @@
+mqtt:
+  host: localhost
+  port: 1883
+  topic: sensors/enviro
+  username:
+  password:
+  tls: false
+  interval: 10
