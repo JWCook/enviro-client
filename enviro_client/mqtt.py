@@ -5,23 +5,9 @@ import time
 from subprocess import check_output
 
 import paho.mqtt.client as mqtt
-from fonts.ttf import RobotoMedium as UserFont
 from loguru import logger
-from PIL import ImageFont
 
-from enviro_client import Display, Enviro, load_config
-
-
-# mqtt callbacks
-def on_connect(client, userdata, flags, rc):
-    if rc == 0:
-        print("connected OK")
-    else:
-        print("Bad connection Returned code=", rc)
-
-
-def on_publish(client, userdata, mid):
-    print("mid: " + str(mid))
+from enviro_client import Enviro, load_config
 
 
 # Check for Wi-Fi connection
@@ -30,25 +16,12 @@ def check_wifi():
 
 
 # Display Raspberry Pi serial and Wi-Fi status on LCD
-def display_status(disp: Display, mqtt_broker):
-    # Text settings
-    font_size = 12
-    font = ImageFont.truetype(UserFont, font_size)
-
+def display_status(enviro: Enviro, mqtt_broker):
     wifi_status = "connected" if check_wifi() else "disconnected"
-    text_colour = (255, 255, 255)
-    back_colour = (0, 170, 170) if check_wifi() else (85, 15, 15)
-    message = f'WiFi: {wifi_status}\nmqtt-broker: {mqtt_broker}'
-
-    # img = Image.new("RGB", (disp.width, disp.height), color=(0, 0, 0))
-    # draw = ImageDraw.Draw(img)
-    disp.new_frame()
-    size_x, size_y = disp.draw.textsize(message, font)
-    x = (disp.width - size_x) / 2
-    y = (disp.height / 2) - (size_y / 2)
-    disp.draw.rectangle((0, 0, 160, 80), back_colour)
-    disp.draw.text((x, y), message, font=font, fill=text_colour)
-    disp.draw_frame()
+    enviro.disp.draw_text_box(
+        f'WiFi: {wifi_status}\nmqtt-broker: {mqtt_broker}',
+        bg_color=(0, 170, 170) if check_wifi() else (85, 15, 15),
+    )
 
 
 def configure_client(config, device_id):
@@ -88,11 +61,22 @@ def main():
             logger.info(values)
             mqtt_client.publish(topic, json.dumps(values))
             display_status(enviro.display, config['host'])
-
             time.sleep(config['interval'])
         except KeyboardInterrupt:
             enviro.display.set_backlight(0)
             exit(0)
+
+
+# Optional: MQTT callbacks
+# def on_connect(client, userdata, flags, rc):
+#     if rc == 0:
+#         print("connected OK")
+#     else:
+#         print("Bad connection Returned code=", rc)
+
+
+# def on_publish(client, userdata, mid):
+#     print("mid: " + str(mid))
 
 
 if __name__ == "__main__":

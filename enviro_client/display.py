@@ -11,10 +11,9 @@ N_COLUMNS = 1  # Display columns for 'combined' mode
 TOP_POS = 25  # Position of the top bar
 
 # Font settings
-FONT_SIZE = 20
-FONT_SIZE_SMALL = 10
-FONT = ImageFont.truetype(UserFont, FONT_SIZE)
-FONT_SMALL = ImageFont.truetype(UserFont, FONT_SIZE_SMALL)
+FONT_LG = ImageFont.truetype(UserFont, 20)
+FONT_MED = ImageFont.truetype(UserFont, 12)
+FONT_MED = ImageFont.truetype(UserFont, 10)
 X_OFFSET = 2
 Y_OFFSET = 2
 
@@ -53,7 +52,7 @@ class Display(ST7735):
         """Draw text for a single metric"""
         x = X_OFFSET + (self.col_size * (self._current_row // self.n_rows))
         y = Y_OFFSET + (self.row_size * (self._current_row % self.n_rows))
-        self.draw.text((x, y), text, fill=color, font=FONT_SMALL)
+        self.draw.text((x, y), text, fill=color, font=FONT_MED)
         self._current_row += 1
 
     def draw_graph(self, text, values):
@@ -73,8 +72,18 @@ class Display(ST7735):
         self.draw.rectangle((x, line_y, x + 1, line_y + 1), fill=BG_BLACK)
 
     def _draw_text_bar(self, text):
-        """Display text in the top bar"""
-        self.draw.text((0, 0), text, font=FONT, fill=BG_BLACK)
+        """Display text using a status bar at the top of the screen"""
+        self.draw.text((0, 0), text, font=FONT_LG, fill=BG_BLACK)
+
+    def draw_text_box(self, text, text_color=(255, 255, 255), bg_color=(0, 170, 170)):
+        """Display text in a box using the whole screen"""
+        self.new_frame()
+        size_x, size_y = self.draw.textsize(text, FONT_MED)
+        x = (self.width - size_x) / 2
+        y = (self.height / 2) - (size_y / 2)
+        self.draw.rectangle((0, 0, 160, 80), bg_color)
+        self.draw.text((x, y), text, font=FONT_MED, fill=text_color)
+        self.draw_frame()
 
 
 def _normalize(values):
