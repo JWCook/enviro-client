@@ -1,3 +1,5 @@
+from datetime import timedelta
+from time import time
 from typing import Optional, Tuple
 
 from loguru import logger
@@ -20,6 +22,7 @@ class Enviro:
         self.display = Display(n_metrics=5)
         self.proximity = ProximitySensor()
         self.mode = 0
+        self.start_time = time()
 
         temp = TemperatureSensor()
         self.sensors: Tuple[Sensor] = (
@@ -54,3 +57,7 @@ class Enviro:
                 if line.startswith('Serial'):
                     return line.split(':')[1].strip()
         return 'N/A'
+
+    def uptime(self) -> timedelta:
+        """Get the application (not device) uptime"""
+        return timedelta(seconds=int(time() - self.start_time))

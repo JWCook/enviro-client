@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 import json
 import ssl
-import time
 from subprocess import check_output
+from time import sleep
 
-import paho.mqtt.client as mqtt
 from loguru import logger
+from paho.mqtt.client import Client as MQTTClient
 
 from enviro_client import Enviro, load_config
 
@@ -16,10 +16,11 @@ def check_wifi():
 
 
 # Display Raspberry Pi serial and Wi-Fi status on LCD
-def display_status(enviro: Enviro, mqtt_broker):
+def display_status(enviro: Enviro, mqtt_host, n_sent):
     wifi_status = "connected" if check_wifi() else "disconnected"
-    enviro.disp.draw_text_box(
-        f'WiFi: {wifi_status}\nmqtt-broker: {mqtt_broker}',
+    enviro.display.draw_text_box(
+        f'WiFi: {wifi_status}\nMQTT host: {mqtt_host}\n'
+        f'Uptime: {enviro.uptime()}\nData points sent: {n_sent}',
         bg_color=(0, 170, 170) if check_wifi() else (85, 15, 15),
     )
 
@@ -27,7 +28,7 @@ def display_status(enviro: Enviro, mqtt_broker):
 def configure_client(config, device_id):
     # Use Raspberry Pi serial as client ID
     device_id = f'rpi-{device_id}'
-    mqtt_client = mqtt.Client(client_id=device_id)
+    mqtt_client = MQTTClient(client_id=device_id)
 
     # Add authentication, if specified
     if config['tls'] is True:
@@ -48,6 +49,7 @@ def configure_client(config, device_id):
 def main():
     enviro = Enviro()
     device_id = enviro.get_device_id()
+    n_sent = 0
 
     # Configure MQTT client
     config = load_config()['mqtt']
@@ -60,9 +62,11 @@ def main():
             values = enviro.read_all()
             logger.info(values)
             mqtt_client.publish(topic, json.dumps(values))
-            display_status(enviro.display, config['host'])
-            time.sleep(config['interval'])
+            n_sent += 1
+            display_status(enviro, config['host'], n_sent)
+            sleep(config['interval'])
         except KeyboardInterrupt:
+            logger.warning('Shutting down')
             enviro.display.set_backlight(0)
             exit(0)
 
