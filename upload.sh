@@ -1,2 +1,7 @@
 #!/usr/bin/env bash
-scp -rp $(pwd)/enviro_client/ rpi:~/enviro-client/
+# TODO: Remotely start job via tmux session
+rsync -r \
+    --info=progress2 \
+    --exclude=.git \
+    --filter=':- .gitignore' \
+    ./ rpi:~/enviro-client
