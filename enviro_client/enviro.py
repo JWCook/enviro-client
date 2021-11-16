@@ -27,6 +27,10 @@ MODE_DISPLAY_STATUS = 1
 class Enviro:
     """Class that manages the Enviro's sensors, display, and (optionally) an MQTT client for sending
     sensor data.
+
+    The main entry points are :py:meth:`Enviro.render`, and :py:meth:`Enviro.publish`, intended to
+    be called from a loop. Individual features are broken down into other methods if different
+    behavior is needed.
     """
 
     def __init__(self):
@@ -57,24 +61,31 @@ class Enviro:
         if self.config['mqtt'].get('enabled', False):
             self.mqtt = MQTTClient(self.device_id, config=self.config['mqtt'])
 
-    def loop(self):
-        """WIP"""
-        self.check_mode()
-        self.publish()
+    def check_mode(self):
+        """Check if we have changed the display mode, by using the proximity sensor as a button"""
+        if self.proximity.check_press():
+            self.cycle_mode()
+        return self.mode
 
-        if active_sensor := self.get_active_sensor():
-            active_sensor.read()
-            self.display.draw_graph(active_sensor.status(), active_sensor.history)
-        elif self.mode == MODE_DISPLAY_ALL:
-            self.display_all()
-        elif self.mode == MODE_DISPLAY_STATUS:
-            self.display_status()
+    def cycle_mode(self):
+        """Switch to the next display mode"""
+        n_modes = len(self.sensors) + N_EXTRA_MODES
+        self.mode += 1
+        self.mode %= n_modes
+        logger.info(f'Switched to mode {self.mode}')
 
     def close(self):
         """Clear the display and close the MQTT connection"""
         logger.warning('Shutting down')
         self.display.off()
         self.mqtt.disconnect()
+
+    def display_active_sensor(self):
+        """Display data from the currently selected sensor"""
+        sensor = self.get_active_sensor()
+        if sensor:
+            sensor.read()
+            self.display.draw_graph(sensor.status(), sensor.history)
 
     def display_all(self) -> None:
         """Display all sensor readings"""
@@ -90,14 +101,6 @@ class Enviro:
             f'Packets sent: {self.mqtt.n_sent if self.mqtt else 0}'
         )
         self.display.draw_text_box(status, bg_color=BG_CYAN if connected else BG_RED)
-
-    def check_mode(self):
-        """Check if we have changed the mode by using the proximity sensor as a button"""
-        n_modes = len(self.sensors) + N_EXTRA_MODES
-        if self.proximity.check_press():
-            self.mode += 1
-            self.mode %= n_modes
-            logger.info(f'Switched to mode {self.mode}')
 
     def get_active_sensor(self) -> Optional[Sensor]:
         """Get the currently selected sensor, if any"""
@@ -122,6 +125,16 @@ class Enviro:
             sensor.read()
             sensor_statuses[sensor.status()] = sensor.bin_color()
         return sensor_statuses
+
+    def render(self):
+        """Draw a new frame on the display according to the currently selected mode"""
+        mode = self.check_mode()
+        if mode == MODE_DISPLAY_ALL:
+            self.display_all()
+        elif mode == MODE_DISPLAY_STATUS:
+            self.display_status()
+        else:
+            self.display_active_sensor()
 
     def uptime(self) -> timedelta:
         """Get the application uptime"""
