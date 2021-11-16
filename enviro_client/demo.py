@@ -12,7 +12,7 @@ def display_text(sensor, enviro):
     enviro.display.draw_graph(str(sensor), sensor.history)
 
 
-def show_all_metrics(enviro: Enviro):
+def display_all_metrics(enviro: Enviro):
     enviro.display.new_frame()
 
     for sensor in enviro.sensors:
@@ -30,7 +30,7 @@ if __name__ == '__main__':
             if active_sensor := enviro.get_active_sensor():
                 display_text(active_sensor, enviro)
             else:
-                show_all_metrics(enviro)
+                display_all_metrics(enviro)
             sleep(0.25)
     except KeyboardInterrupt:
         enviro.display.set_backlight(0)

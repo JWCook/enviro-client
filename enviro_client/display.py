@@ -93,6 +93,11 @@ class Display(ST7735):
         self.draw.text((x, y), text, font=FONT_MED, fill=text_color)
         self.draw_frame()
 
+    def off(self):
+        self.new_frame()
+        self.draw_frame()
+        self.set_backlight(0)
+
 
 def _normalize(values: Sequence[float]) -> List[float]:
     """Normalize the values between 0 and 1"""

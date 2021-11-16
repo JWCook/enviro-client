@@ -1,3 +1,4 @@
+import subprocess
 from datetime import timedelta
 from time import time
 from typing import Dict, Optional, Tuple
@@ -13,12 +14,14 @@ from enviro_client import (
     ProximitySensor,
     Sensor,
     TemperatureSensor,
+    load_config,
 )
 
 
 class Enviro:
     def __init__(self):
-        logger.debug("Initializing display and sensors")
+        logger.debug('Initializing display and sensors')
+        self.config = load_config()
         self.display = Display(n_metrics=5)
         self.proximity = ProximitySensor()
         self.mode = 0
@@ -33,8 +36,12 @@ class Enviro:
             NoiseSensor(),
         )
 
+    def check_connection(self) -> bool:
+        """Check for an active network connection"""
+        return bool(subprocess.check_output(["hostname", "-I"]))
+
     def check_mode(self) -> int:
-        """If the proximity crosses the threshold, toggle the mode"""
+        """Check if we have changed the mode by using the proximity sensor as a button"""
         if self.proximity.check_press():
             self.mode += 1
             self.mode %= len(self.sensors) + 1
