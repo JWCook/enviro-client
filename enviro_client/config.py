@@ -1,3 +1,4 @@
+# TODO: Copy packaged config to config dir (using appdirs) to use as defaults
 from pathlib import Path
 
 from yaml import safe_load

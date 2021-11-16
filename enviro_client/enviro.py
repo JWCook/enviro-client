@@ -1,6 +1,6 @@
 from datetime import timedelta
 from time import time
-from typing import Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 from loguru import logger
 
@@ -46,7 +46,7 @@ class Enviro:
         mode = self.check_mode()
         return self.sensors[mode - 1] if mode > 0 else None
 
-    def read_all(self) -> None:
+    def read_all(self) -> Dict[str, float]:
         """Get a reading from all sensors"""
         return {sensor.name: sensor.read() for sensor in self.sensors}
 

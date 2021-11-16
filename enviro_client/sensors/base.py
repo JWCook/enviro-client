@@ -23,8 +23,7 @@ class Sensor:
 
     name: str
     unit: str
-    bins: Tuple[int, int, int, int]
-    value: float
+    bins: Tuple[float, float, float, float]
     history: deque[float]
 
     def __init__(self, history_len: int = HISTORY_LEN):

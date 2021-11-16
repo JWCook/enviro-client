@@ -39,3 +39,7 @@ line-length = 100
 profile = 'black'
 line_length = 100
 skip_gitignore = true
+
+[tool.mypy]
+ignore_missing_imports = true
+files = ['enviro_client']

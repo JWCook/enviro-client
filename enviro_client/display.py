@@ -1,10 +1,12 @@
 from colorsys import hsv_to_rgb
-from typing import Tuple
+from typing import List, Sequence, Tuple
 
 from fonts.ttf import RobotoMedium as UserFont
 from loguru import logger
 from PIL import Image, ImageDraw, ImageFont
 from ST7735 import ST7735
+
+RGBColor = Tuple[float, float, float]
 
 # Display settings
 N_COLUMNS = 1  # Display columns for 'combined' mode
@@ -18,11 +20,12 @@ X_OFFSET = 2
 Y_OFFSET = 2
 
 BG_BLACK = (0, 0, 0)
+BG_CYAN = (0, 170, 170)
 BG_WHITE = (255, 255, 255)
 
 
 class Display(ST7735):
-    def __init__(self, n_metrics=0, n_columns=N_COLUMNS, **kwargs):
+    def __init__(self, n_metrics: int = 0, n_columns: int = N_COLUMNS, **kwargs):
         super().__init__(
             port=0,
             cs=1,
@@ -41,21 +44,21 @@ class Display(ST7735):
         self.col_size = self.width // n_columns
         self._current_row = 0
 
-    def new_frame(self, fill=BG_BLACK):
+    def new_frame(self, fill: RGBColor = BG_BLACK):
         self._current_row = 0
         self.draw.rectangle((0, 0, self.width, self.height), fill=fill)
 
     def draw_frame(self):
         self.display(self.canvas)
 
-    def draw_metric_text(self, text, color):
+    def draw_metric_text(self, text: str, text_color: RGBColor):
         """Draw text for a single metric"""
         x = X_OFFSET + (self.col_size * (self._current_row // self.n_rows))
         y = Y_OFFSET + (self.row_size * (self._current_row % self.n_rows))
-        self.draw.text((x, y), text, fill=color, font=FONT_MED)
+        self.draw.text((x, y), text, fill=text_color, font=FONT_MED)
         self._current_row += 1
 
-    def draw_graph(self, text, values):
+    def draw_graph(self, text: str, values: Sequence[float]):
         """Draw a line graph with colored background"""
         self.new_frame(fill=BG_WHITE)
         for x, value in enumerate(_normalize(values)):
@@ -63,7 +66,7 @@ class Display(ST7735):
         self._draw_text_bar(text)
         self.draw_frame()
 
-    def _draw_graph_value(self, x, value):
+    def _draw_graph_value(self, x: float, value: float):
         # Draw a 1-pixel wide bar, colored based on relative value
         self.draw.rectangle((x, TOP_POS, x + 1, self.height), _value_to_rgb(value))
 
@@ -71,11 +74,16 @@ class Display(ST7735):
         line_y = self.height - (value * (self.height - TOP_POS))
         self.draw.rectangle((x, line_y, x + 1, line_y + 1), fill=BG_BLACK)
 
-    def _draw_text_bar(self, text):
+    def _draw_text_bar(self, text: str):
         """Display text using a status bar at the top of the screen"""
         self.draw.text((0, 0), text, font=FONT_LG, fill=BG_BLACK)
 
-    def draw_text_box(self, text, text_color=(255, 255, 255), bg_color=(0, 170, 170)):
+    def draw_text_box(
+        self,
+        text: str,
+        text_color: RGBColor = BG_WHITE,
+        bg_color: RGBColor = BG_CYAN,
+    ):
         """Display text in a box using the whole screen"""
         self.new_frame()
         size_x, size_y = self.draw.textsize(text, FONT_MED)
@@ -86,13 +94,13 @@ class Display(ST7735):
         self.draw_frame()
 
 
-def _normalize(values):
+def _normalize(values: Sequence[float]) -> List[float]:
     """Normalize the values between 0 and 1"""
     vmin, vmax = min(values), max(values)
     return [(v - vmin + 1) / (vmax - vmin + 1) for v in values]
 
 
-def _value_to_rgb(value: float) -> Tuple[int, int, int]:
+def _value_to_rgb(value: float) -> RGBColor:
     """Translate a normalized sensor value to RGB"""
     value = (1.0 - value) * 0.6
-    return tuple(int(x * 255.0) for x in hsv_to_rgb(value, 1.0, 1.0))
+    return tuple(round(v * 255) for v in hsv_to_rgb(value, 1.0, 1.0))  # type: ignore
