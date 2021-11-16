@@ -5,16 +5,18 @@ from typing import Tuple
 from loguru import logger
 from numpy import digitize
 
+from enviro_client.display import BLUE, CYAN, GREEN, RED, YELLOW, RGBColor
+
 # Default number of sensor readings to keep in history
 HISTORY_LEN = 160
 
 # RGB palette for coloring values by "bin"
 BIN_COLORS = [
-    (0, 0, 255),  # Very Low
-    (0, 255, 255),  # Low
-    (0, 255, 0),  # Normal
-    (255, 255, 0),  # High
-    (255, 0, 0),  # Very High
+    BLUE,  # Very Low
+    CYAN,  # Low
+    GREEN,  # Normal
+    YELLOW,  # High
+    RED,  # Very High
 ]
 
 
@@ -46,12 +48,13 @@ class Sensor:
     def average(self) -> float:
         return sum(self.history) / len(self.history)
 
-    def color(self) -> Tuple[int, int, int]:
+    def bin_color(self) -> RGBColor:
         """Get an RGB value corresponding to the current sensor value.
         Note: ``bins`` defines value ranges, and ``BIN_COLORS`` defines correponding colors.
         """
         color_idx = digitize(self.value, self.bins)
         return BIN_COLORS[color_idx]
 
-    def __str__(self):
+    def status(self) -> str:
+        """Get a status message to display"""
         return f'{self.name}: {self.value:.1f} {self.unit}'

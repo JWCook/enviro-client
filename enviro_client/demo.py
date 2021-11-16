@@ -1,37 +1,15 @@
 #!/usr/bin/env python3
 from time import sleep
 
-from loguru import logger
+from enviro_client.enviro import Enviro
 
-from enviro_client import Enviro
-
-
-def display_text(sensor, enviro):
-    sensor.read()
-    logger.info(str(sensor))
-    enviro.display.draw_graph(str(sensor), sensor.history)
-
-
-def display_all_metrics(enviro: Enviro):
-    enviro.display.new_frame()
-
-    for sensor in enviro.sensors:
-        sensor.read()
-        enviro.display.draw_metric_text(str(sensor), sensor.color())
-        logger.info(str(sensor))
-
-    enviro.display.draw_frame()
-
-
+# TODO: Run MQTT publish from a separate thread at different interval
 if __name__ == '__main__':
     enviro = Enviro()
     try:
         while True:
-            if active_sensor := enviro.get_active_sensor():
-                display_text(active_sensor, enviro)
-            else:
-                display_all_metrics(enviro)
-            sleep(0.25)
+            enviro.loop()
+            sleep(2)
+            # sleep(enviro.mqtt.interval)
     except KeyboardInterrupt:
-        enviro.display.set_backlight(0)
-        exit(0)
+        enviro.close()

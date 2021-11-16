@@ -21,7 +21,14 @@ Y_OFFSET = 2
 
 BG_BLACK = (0, 0, 0)
 BG_CYAN = (0, 170, 170)
+BG_RED = (85, 15, 15)
 BG_WHITE = (255, 255, 255)
+
+BLUE = (0, 0, 255)
+CYAN = (0, 255, 255)
+GREEN = (0, 255, 0)
+YELLOW = (255, 255, 0)
+RED = (255, 0, 0)
 
 
 class Display(ST7735):
@@ -51,7 +58,14 @@ class Display(ST7735):
     def draw_frame(self):
         self.display(self.canvas)
 
-    def draw_metric_text(self, text: str, text_color: RGBColor):
+    def draw_all_metrics(self, status_colors: dict[str, RGBColor]):
+        """Draw text for all provided metrics"""
+        self.new_frame()
+        for status, color in status_colors.items():
+            self._draw_metric_text(status, color)
+        self.draw_frame()
+
+    def _draw_metric_text(self, text: str, text_color: RGBColor):
         """Draw text for a single metric"""
         x = X_OFFSET + (self.col_size * (self._current_row // self.n_rows))
         y = Y_OFFSET + (self.row_size * (self._current_row % self.n_rows))
@@ -67,10 +81,10 @@ class Display(ST7735):
         self.draw_frame()
 
     def _draw_graph_value(self, x: float, value: float):
-        # Draw a 1-pixel wide bar, colored based on relative value
+        """Draw a 1-pixel wide bar, colored based on relative value, with a black pixel used to form
+        a line graph
+        """
         self.draw.rectangle((x, TOP_POS, x + 1, self.height), _value_to_rgb(value))
-
-        # Draw a single black pixel to form a line graph
         line_y = self.height - (value * (self.height - TOP_POS))
         self.draw.rectangle((x, line_y, x + 1, line_y + 1), fill=BG_BLACK)
 
@@ -94,6 +108,7 @@ class Display(ST7735):
         self.draw_frame()
 
     def off(self):
+        """Clear the display and turn the backlight off"""
         self.new_frame()
         self.draw_frame()
         self.set_backlight(0)

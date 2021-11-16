@@ -1,4 +1,5 @@
 mqtt:
+  enabled: false
   host: localhost
   port: 1883
   topic: sensors/enviro
