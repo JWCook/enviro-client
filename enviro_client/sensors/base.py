@@ -34,7 +34,7 @@ class Sensor:
     bins: Tuple[float, float, float, float]
     history: deque[float]
 
-    def __init__(self, history_len: int = HISTORY_LEN, min_interval: float = 0.1):
+    def __init__(self, min_interval: float = 0.1, history_len: int = HISTORY_LEN):
         logger.debug(f'Initializing {self.__class__.__name__}')
         self.history = deque([0] * history_len, maxlen=history_len)
         self.last_read = None

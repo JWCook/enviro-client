@@ -42,24 +42,23 @@ class Enviro:
         self.mode = 0
         self.start_time = time()
 
+        display_interval = self.config['display']['interval']
+
         # Proximity sensor is used internally, but not directly displayed on screen
         self.proximity = ProximitySensor()
 
         # Configure sensors
-        temp = TemperatureSensor()
+        temp = TemperatureSensor(display_interval)
         self.sensors: tuple[Sensor] = (
             temp,
-            PressureSensor(bme280=temp.bme280),
-            HumiditySensor(bme280=temp.bme280),
-            LightSensor(ltr559=self.proximity.ltr559),
-            NoiseSensor(),
+            PressureSensor(display_interval, bme280=temp.bme280),
+            HumiditySensor(display_interval, bme280=temp.bme280),
+            LightSensor(display_interval, ltr559=self.proximity.ltr559),
+            NoiseSensor(display_interval),
         )
 
         # Configure display
-        self.display = Display(
-            n_metrics=len(self.sensors),
-            interval=self.config['display']['interval'],
-        )
+        self.display = Display(interval=self.config['display']['interval'])
 
         # Configure MQTT client, if enabled
         self.mqtt = None
@@ -96,7 +95,7 @@ class Enviro:
 
     def display_all(self) -> None:
         """Display all sensor readings"""
-        self.display.draw_all_metrics(self.read_all_statuses())
+        self.display.draw_list(self.read_all_statuses())
 
     def display_status(self):
         """Display a status message"""
