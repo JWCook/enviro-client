@@ -17,7 +17,7 @@ def publish_loop(enviro):
         sleep(enviro.mqtt.interval)
 
 
-def main():
+def run():
     enviro = Enviro()
 
     # Run MQTT publish loop in a separate thread so it can run at a different interval than display
@@ -32,4 +32,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    run()

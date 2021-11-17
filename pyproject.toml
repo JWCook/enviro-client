@@ -26,6 +26,9 @@ flake8 = "^4.0"
 isort = "^5.10"
 mypy = "^0.910"
 
+[tool.poetry.scripts]
+enviro-run = 'enviro_client.console:run'
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

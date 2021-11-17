@@ -102,9 +102,9 @@ class Enviro:
         connected = _check_connection()
         status = (
             f'WiFi: {"connected" if connected else "disconnected"}\n'
-            f'Uptime: {self.uptime()}\n'
             f'MQTT host: {self.mqtt.host if self.mqtt else "N/A"}\n'
-            f'Packets sent: {self.mqtt.n_sent if self.mqtt else 0}'
+            f'Packets sent: {self.mqtt.n_sent if self.mqtt else 0}\n'
+            f'Uptime: {self.uptime()}'
         )
         self.display.draw_text_box(status, bg_color=BG_CYAN if connected else BG_RED)
 
@@ -149,6 +149,11 @@ class Enviro:
     def uptime(self) -> timedelta:
         """Get the application uptime"""
         return timedelta(seconds=int(time() - self.start_time))
+
+
+# TODO: Implement sensors for Enviro+... if/when I get one
+class EnviroPlus(Enviro):
+    ...
 
 
 def _check_connection() -> bool:
