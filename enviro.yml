@@ -1,3 +1,7 @@
+display:
+  enabled: true  # TODO: disabling display is not implemented yet
+  interval: 0.25
+
 mqtt:
   enabled: false
   host: localhost

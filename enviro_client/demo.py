@@ -4,13 +4,11 @@ from time import sleep
 
 from enviro_client.enviro import Enviro
 
-DISPLAY_INTERVAL = 0.25
-
 
 def display_loop(enviro):
     while True:
         enviro.render()
-        sleep(DISPLAY_INTERVAL)
+        sleep(enviro.display.interval)
 
 
 def publish_loop(enviro):
@@ -26,6 +24,7 @@ def main():
     publish_thread = Thread(target=publish_loop, args=(enviro,), daemon=True)
     publish_thread.start()
 
+    # Run display loop in main thread
     try:
         display_loop(enviro)
     except KeyboardInterrupt:

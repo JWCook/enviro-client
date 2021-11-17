@@ -56,7 +56,10 @@ class Enviro:
         )
 
         # Configure display
-        self.display = Display(n_metrics=len(self.sensors))
+        self.display = Display(
+            n_metrics=len(self.sensors),
+            interval=self.config['display']['interval'],
+        )
 
         # Configure MQTT client, if enabled
         self.mqtt = None

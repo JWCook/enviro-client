@@ -10,10 +10,10 @@ RGBColor = Tuple[float, float, float]
 
 # Display settings
 N_COLUMNS = 1  # Display columns for 'combined' mode
-TOP_POS = 25  # Position of the top bar
+TOP_POS = 20  # Position of the top bar
 
 # Font settings
-FONT_LG = ImageFont.truetype(UserFont, 20)
+FONT_LG = ImageFont.truetype(UserFont, 16)
 FONT_MED = ImageFont.truetype(UserFont, 12)
 FONT_MED = ImageFont.truetype(UserFont, 10)
 X_OFFSET = 2
@@ -32,7 +32,9 @@ RED = (255, 0, 0)
 
 
 class Display(ST7735):
-    def __init__(self, n_metrics: int = 0, n_columns: int = N_COLUMNS, **kwargs):
+    def __init__(
+        self, n_metrics: int = 0, n_columns: int = N_COLUMNS, interval: float = 0.25, **kwargs
+    ):
         super().__init__(
             port=0,
             cs=1,
@@ -45,6 +47,7 @@ class Display(ST7735):
         logger.debug(f'Initializing {self.width}x{self.height} display')
         self.canvas = Image.new('RGB', (self.width, self.height), color=BG_BLACK)
         self.draw = ImageDraw.Draw(self.canvas)
+        self.interval = interval
 
         # TODO: Calculate this on each draw instead of requiring it up front
         self.n_rows = n_metrics // n_columns
