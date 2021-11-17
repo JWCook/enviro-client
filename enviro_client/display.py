@@ -43,9 +43,10 @@ class Display(ST7735):
             **kwargs,
         )
         logger.debug(f'Initializing {self.width}x{self.height} display')
-        self.canvas = Image.new('RGB', (self.width, self.height), color=(0, 0, 0))
+        self.canvas = Image.new('RGB', (self.width, self.height), color=BG_BLACK)
         self.draw = ImageDraw.Draw(self.canvas)
 
+        # TODO: Calculate this on each draw instead of requiring it up front
         self.n_rows = n_metrics // n_columns
         self.row_size = self.height // self.n_rows
         self.col_size = self.width // n_columns
@@ -103,7 +104,7 @@ class Display(ST7735):
         size_x, size_y = self.draw.textsize(text, FONT_MED)
         x = (self.width - size_x) / 2
         y = (self.height / 2) - (size_y / 2)
-        self.draw.rectangle((0, 0, 160, 80), bg_color)
+        self.draw.rectangle((0, 0, self.width, self.height), bg_color)
         self.draw.text((x, y), text, font=FONT_MED, fill=text_color)
         self.draw_frame()
 

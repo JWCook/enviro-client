@@ -11,7 +11,6 @@ def display_loop(enviro):
     while True:
         enviro.render()
         sleep(DISPLAY_INTERVAL)
-        # sleep(enviro.display.interval)
 
 
 def publish_loop(enviro):
@@ -30,7 +29,6 @@ def main():
     try:
         display_loop(enviro)
     except KeyboardInterrupt:
-        # publish_thread.join()
         enviro.close()
 
 

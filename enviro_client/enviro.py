@@ -1,5 +1,6 @@
 import subprocess
 from datetime import timedelta
+from threading import RLock
 from time import time
 from typing import Optional
 
@@ -37,6 +38,7 @@ class Enviro:
         logger.debug('Initializing sensors and display')
         self.config = load_config()
         self.device_id = _get_device_id()
+        self.lock = RLock()
         self.mode = 0
         self.start_time = time()
 
@@ -83,13 +85,15 @@ class Enviro:
     def display_active_sensor(self):
         """Display data from the currently selected sensor"""
         sensor = self.get_active_sensor()
-        if sensor:
+        if not sensor:
+            return
+        with self.lock:
             sensor.read()
             self.display.draw_graph(sensor.status(), sensor.history)
 
     def display_all(self) -> None:
         """Display all sensor readings"""
-        self.display.draw_all_metrics(self.read_all_colors())
+        self.display.draw_all_metrics(self.read_all_statuses())
 
     def display_status(self):
         """Display a status message"""
@@ -109,22 +113,26 @@ class Enviro:
 
     def publish(self):
         """Log and publish sensor data to MQTT, if enabled"""
-        data = self.read_all()
+        data = self.read_all_values()
         logger.info(data)
         if self.mqtt:
             self.mqtt.publish_json(data)
 
-    def read_all(self) -> dict[str, float]:
-        """Get a reading from all sensors in the format ``{sensor_name: value}``"""
-        return {sensor.name: sensor.read() for sensor in self.sensors}
+    def _read_all(self) -> list[float]:
+        """Refresh and return all sensor values"""
+        with self.lock:
+            return [sensor.read() for sensor in self.sensors]
 
-    def read_all_colors(self) -> dict[str, RGBColor]:
-        """Get a reading from all sensors for display, in the format  ``{sensor_status: bin_color}``"""
-        sensor_statuses = {}
-        for sensor in self.sensors:
-            sensor.read()
-            sensor_statuses[sensor.status()] = sensor.bin_color()
-        return sensor_statuses
+    def read_all_values(self) -> dict[str, float]:
+        """Get a reading from all sensors in the format ``{sensor_name: value}``"""
+        self._read_all()
+        return {sensor.name: sensor.value for sensor in self.sensors}
+
+    def read_all_statuses(self) -> dict[str, RGBColor]:
+        """Get a reading from all sensors for display, in the format  ``{sensor_status:
+        bin_color}``"""
+        self._read_all()
+        return {sensor.status(): sensor.bin_color() for sensor in self.sensors}
 
     def render(self):
         """Draw a new frame on the display according to the currently selected mode"""
