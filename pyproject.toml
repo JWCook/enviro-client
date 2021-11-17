@@ -21,10 +21,10 @@ sounddevice = "^0.4.3"
 st7735 = ">=0.0.4"
 
 [tool.poetry.dev-dependencies]
-black = "^21.10b0"
-flake8 = "^4.0"
-isort = "^5.10"
-mypy = "^0.910"
+coverage                    = "^6.0"
+pre-commit                  = "^2.12"
+pytest                      = "^6.2"
+pytest-cov                  = ">=2.11"
 
 [tool.poetry.scripts]
 enviro-run = 'enviro_client.console:run'

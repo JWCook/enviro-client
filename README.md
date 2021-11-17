@@ -14,3 +14,12 @@ Enviro-client combines the following features into one service:
 * Configure display and MQTT settings via a yaml config file
 
 If you want different behavior, these features are also exposed via the `Enviro` class.
+
+## Installation
+First, it's recommended to set up system dependencies with the
+[enviroplus-python install script](https://github.com/pimoroni/enviroplus-python#installing).
+
+Then:
+```
+pip install enviro-client
+```
