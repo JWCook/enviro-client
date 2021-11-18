@@ -9,20 +9,14 @@ from loguru import logger
 from .config import load_config
 from .display import BG_CYAN, BG_RED, Display, RGBColor
 from .mqtt import MQTTClient
-from .sensors import (
-    HumiditySensor,
-    LightSensor,
-    NoiseSensor,
-    PressureSensor,
-    ProximitySensor,
-    Sensor,
-    TemperatureSensor,
-)
+from .sensors import BME280Sensor, LTR559Sensor, Metric, Sensor, SPH0645Sensor
 
 # Total number of display modes is len(sensors) plus extra modes for additional info
 N_EXTRA_MODES = 2
 MODE_DISPLAY_ALL = 0
 MODE_DISPLAY_STATUS = 1
+
+from itertools import chain
 
 
 class Enviro:
@@ -46,17 +40,18 @@ class Enviro:
         display_interval = self.config['display']['interval']
         self.display = Display(interval=self.config['display']['interval'])
 
-        # Proximity sensor is used internally, but not directly displayed on screen
-        self.proximity = ProximitySensor()
+        # Proximity sensor is used internally for toggling display modes
+        ltr559 = LTR559Sensor(display_interval)
+        self.proximity = ltr559.metrics[-1]
 
         # Configure sensors
-        temp = TemperatureSensor(display_interval)
         self.sensors: tuple[Sensor] = (
-            temp,
-            PressureSensor(display_interval, bme280=temp.bme280),
-            HumiditySensor(display_interval, bme280=temp.bme280),
-            LightSensor(display_interval, ltr559=self.proximity.ltr559),
-            NoiseSensor(display_interval),
+            BME280Sensor(display_interval),
+            SPH0645Sensor(display_interval),
+            ltr559,
+        )
+        self.metrics: tuple[Metric] = tuple(
+            chain.from_iterable(sensor.metrics for sensor in self.sensors)
         )
 
         # Configure MQTT client, if enabled
@@ -83,9 +78,9 @@ class Enviro:
         self.display.off()
         self.mqtt.disconnect()
 
-    def display_active_sensor(self):
-        """Display data from the currently selected sensor"""
-        sensor = self.get_active_sensor()
+    def display_active_metric(self):
+        """Display data from the currently selected sensor metric"""
+        sensor = self.get_active_metric()
         if not sensor:
             return
         with self.lock:
@@ -107,7 +102,7 @@ class Enviro:
         )
         self.display.draw_text_box(status, bg_color=BG_CYAN if connected else BG_RED)
 
-    def get_active_sensor(self) -> Optional[Sensor]:
+    def get_active_metric(self) -> Optional[Sensor]:
         """Get the currently selected sensor, if any"""
         sensor_idx = self.mode - N_EXTRA_MODES
         return self.sensors[sensor_idx] if sensor_idx >= 0 else None
@@ -119,21 +114,20 @@ class Enviro:
         if self.mqtt:
             self.mqtt.publish_json(data)
 
-    def _read_all(self) -> list[float]:
-        """Refresh and return all sensor values"""
-        with self.lock:
-            return [sensor.read() for sensor in self.sensors]
-
     def read_all_values(self) -> dict[str, float]:
-        """Get a reading from all sensors in the format ``{sensor_name: value}``"""
-        self._read_all()
-        return {sensor.name: sensor.value for sensor in self.sensors}
+        """Get readings from all sensors in the format ``{metric_name: value}``"""
+        readings = {}
+        for sensor in self.sensors:
+            readings.update(sensor.read_all_values())
+        return readings
 
     def read_all_statuses(self) -> dict[str, RGBColor]:
         """Get a reading from all sensors for display, in the format  ``{sensor_status:
         bin_color}``"""
-        self._read_all()
-        return {sensor.status(): sensor.bin_color() for sensor in self.sensors}
+        readings = {}
+        for sensor in self.sensors:
+            readings.update(sensor.read_all_statuses())
+        return readings
 
     def render(self):
         """Draw a new frame on the display according to the currently selected mode"""
@@ -143,7 +137,7 @@ class Enviro:
         elif mode == MODE_DISPLAY_STATUS:
             self.display_status()
         else:
-            self.display_active_sensor()
+            self.display_active_metric()
 
     def uptime(self) -> timedelta:
         """Get the application uptime"""

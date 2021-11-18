@@ -7,13 +7,13 @@ Adapted from: https://github.com/pimoroni/enviroplus-python/blob/master/library/
 import numpy as np
 import sounddevice
 
-from .base import Sensor
+from .base import Sensor, Metric
 
 
-class NoiseSensor(Sensor):
+class Noise(Metric):
     name = 'noise'
     unit = 'dB'
-    bins = (10, 20, 65, 85)
+    bins = (20, 40, 60, 80)
 
     def __init__(self, *args, sample_rate: int = 16000, duration: float = 0.5, **kwargs):
         """Noise measurement.
@@ -83,3 +83,7 @@ class NoiseSensor(Sensor):
             channels=1,
             dtype='float64',
         )
+
+
+class SPH0645Sensor(Sensor):
+    metric_classes = [Noise]
