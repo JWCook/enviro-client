@@ -1,5 +1,6 @@
 display:
-  enabled: true  # TODO: disabling display is not implemented yet
+  enabled: true  # TODO: not yet implemented
+  dim_delay: -1  # TODO: not yet implemented
   interval: 0.25
 
 mqtt:

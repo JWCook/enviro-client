@@ -3,6 +3,7 @@
 Description=Enviro MQTT Publisher
 After=network.target
 
+# TODO: option to point to user site-packages instead of locally cloned repo
 [Service]
 ExecStart=/usr/bin/python3 /home/pi/enviro-client/enviro_client/console.py
 WorkingDirectory=/home/pi/enviro-client

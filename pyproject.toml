@@ -2,29 +2,37 @@
 name = "enviro-client"
 version = "0.0.1"
 description = "Enviro monitoring add-on for Raspberry Pi"
-authors = ["'Phil Howard' <phil@gadgetoid.com>", "Jordan Cook"]
+authors = ["Jordan Cook"]
 license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-font-roboto = "*"
-fonts = "*"
+
+# Library dependencies
+cffi = "*"
+fonts = ">=0.0.3"
+font-roboto = ">=0.0.1"
 loguru = "^0.5"
-ltr559 = ">=0.1.1"
 numpy = {version = "^1.21.4", python = "<3.11"}
 paho-mqtt = "^1.6"
 pillow = "^8.0"
-pimoroni-bme280 = ">=0.1.1"
 pyyaml = "^6.0"
+
+# Hardware dependencies/drivers
+ltr559 = ">=0.1.1"
+pimoroni-bme280 = ">=0.1.1"
+'rpi.gpio' = "^0.7"
+smbus = "^1.1"
 sounddevice = "^0.4.3"
+spidev = "^3.5"
 st7735 = ">=0.0.4"
 
 [tool.poetry.dev-dependencies]
-coverage                    = "^6.0"
-pre-commit                  = "^2.12"
-pytest                      = "^6.2"
-pytest-cov                  = ">=2.11"
+coverage = "^6.0"
+pre-commit = "^2.12"
+pytest = "^6.2"
+pytest-cov = ">=2.11"
 
 [tool.poetry.scripts]
 enviro-run = 'enviro_client.console:run'
