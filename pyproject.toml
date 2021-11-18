@@ -34,7 +34,7 @@ pytest = "^6.2"
 pytest-cov = ">=2.11"
 
 [tool.poetry.scripts]
-enviro-run = 'rpi_enviro_monitor.console:run'
+enviro-run = 'rpi_enviro_monitor.app:run'
 
 [build-system]
 requires = ["poetry-core"]

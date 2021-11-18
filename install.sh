@@ -50,11 +50,7 @@ fi
 
 # Install systemd service and run on startup
 if [ ! -f $SYSTEMD_UNIT ]; then
-    curl -fLo enviro.service $SYSTEMD_UNIT_URL
-    # Update unit file to point to wherever the library has been installed
-    entry_point=$(pyfile rpi_enviro_monitor.console)
-    sed -i "s|{{ENTRY_POINT}}|$entry_point|" enviro.service
-    sudo mv enviro.service $SYSTEMD_UNIT
+    curl -fLo $SYSTEMD_UNIT $SYSTEMD_UNIT_URL
 fi
 sudo systemctl enable enviro.service
 sudo systemctl start  enviro.service

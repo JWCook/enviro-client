@@ -3,7 +3,7 @@ Description=Enviro Display and MQTT Client
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 {{ENTRY_POINT}}
+ExecStart=/usr/bin/python -m rpi_enviro_monitor.app
 StandardOutput=inherit
 StandardError=inherit
 Restart=always
