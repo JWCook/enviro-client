@@ -6,10 +6,10 @@ from typing import Optional
 
 from loguru import logger
 
-from enviro_client.config import load_config
-from enviro_client.display import BG_CYAN, BG_RED, Display, RGBColor
-from enviro_client.mqtt import MQTTClient
-from enviro_client.sensors import (
+from .config import load_config
+from .display import BG_CYAN, BG_RED, Display, RGBColor
+from .mqtt import MQTTClient
+from .sensors import (
     HumiditySensor,
     LightSensor,
     NoiseSensor,

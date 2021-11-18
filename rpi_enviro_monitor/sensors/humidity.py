@@ -6,7 +6,7 @@ import subprocess
 
 from bme280 import BME280
 
-from enviro_client.sensors import Sensor
+from .base import Sensor
 
 CPU_TEMP_FACTOR = 2.25
 

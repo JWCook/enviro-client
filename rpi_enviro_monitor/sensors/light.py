@@ -6,7 +6,7 @@ from time import time
 
 from ltr559 import LTR559
 
-from enviro_client.sensors import Sensor
+from .base import Sensor
 
 # Proximity sensor delay in seconds, for using as a "button"
 PROXIMITY_DELAY = 0.5

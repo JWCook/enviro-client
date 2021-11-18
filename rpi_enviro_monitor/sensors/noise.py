@@ -7,7 +7,7 @@ Adapted from: https://github.com/pimoroni/enviroplus-python/blob/master/library/
 import numpy as np
 import sounddevice
 
-from enviro_client.sensors import Sensor
+from .base import Sensor
 
 
 class NoiseSensor(Sensor):

@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "enviro-client"
+name = "rpi-enviro-monitor"
 version = "0.0.1"
-description = "Enviro monitoring add-on for Raspberry Pi"
+description = "Python client for the Pimoroni Enviro for Raspberry Pi"
 authors = ["Jordan Cook"]
 license = "MIT"
 readme = "README.md"
@@ -34,7 +34,7 @@ pytest = "^6.2"
 pytest-cov = ">=2.11"
 
 [tool.poetry.scripts]
-enviro-run = 'enviro_client.console:run'
+enviro-run = 'rpi_enviro_monitor.console:run'
 
 [build-system]
 requires = ["poetry-core"]
@@ -51,4 +51,4 @@ skip_gitignore = true
 
 [tool.mypy]
 ignore_missing_imports = true
-files = ['enviro_client']
+files = ['rpi_enviro_monitor']

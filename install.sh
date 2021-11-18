@@ -40,7 +40,7 @@ if [ -f pyproject.toml ]; then
     pip install --user -U '.'
 # Otherwise install from PyPI
 else
-    pip install --user -U enviro-client
+    pip install --user -U rpi-enviro-monitor
 fi
 
 # Install default config file
@@ -51,8 +51,8 @@ fi
 # Install systemd service and run on startup
 if [ ! -f $SYSTEMD_UNIT ]; then
     curl -fLo enviro.service $SYSTEMD_UNIT_URL
-    # Update unit file to point to wherever enviro_client has been installed
-    entry_point=$(pyfile enviro_client.console)
+    # Update unit file to point to wherever the library has been installed
+    entry_point=$(pyfile rpi_enviro_monitor.console)
     sed -i "s|{{ENTRY_POINT}}|$entry_point|" enviro.service
     sudo mv enviro.service $SYSTEMD_UNIT
 fi

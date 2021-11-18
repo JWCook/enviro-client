@@ -2,7 +2,7 @@
 from threading import Thread
 from time import sleep
 
-from enviro_client.enviro import Enviro
+from . import Enviro
 
 
 def display_loop(enviro):

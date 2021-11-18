@@ -1,7 +1,10 @@
-# Enviro client
+# RPi Enviro Monitor
 **WIP**
 
-A python client for the [Pimoroni Enviro](https://shop.pimoroni.com/products/enviro?variant=31155658489939).
+A python client for Raspberry Pi environmental sensors. Currently this is intended for the
+[Pimoroni Enviro](https://shop.pimoroni.com/products/enviro?variant=31155658489939), but is
+extensible to potentially apply to other sensors.
+
 This adapts a subset of the examples from the
 [enviroplus-python](https://github.com/pimoroni/enviroplus-python) repo, combines them into a single
 service, and also exposes them for eaiser use as a python library.
@@ -10,14 +13,14 @@ Currently this is mainly just for learning purposes, and does not (yet) support 
 gas and PM sensors.
 
 ## Features
-`enviro-client` combines the following features into one program, intended to be used as a systemd service:
+`rpi-enviro-monitor` combines the following features into one program, intended to be used as a systemd service:
 * Display bar charts for individual sensor metrics
 * Display combined sensor readings and device status
 * Toggle between display modes using the proximity sensor
 * Publish sensor readings via MQTT (optional)
 * Configure via a yaml config file
 
-`enviro-client` can also be used as a python library, if you don't plan on using it as a service,
+`rpi-enviro-monitor` can also be used as a python library, if you don't plan on using it as a service,
 or if you want different behavior.
 
 ## Installation
@@ -27,9 +30,9 @@ or if you want different behavior.
 * Python 3.9+
 
 ### Quick installation
-To install and configure `enviro-client` as a systemd service:
+To install and configure `rpi-enviro-monitor` as a systemd service:
 ```
-curl -fLo install.sh https://raw.githubusercontent.com/JWCook/enviro-client/main/install.sh
+curl -fLo install.sh https://raw.githubusercontent.com/JWCook/rpi-enviro-monitor/main/install.sh
 ./install.sh
 ```
 Then, update config settings in `~/.config/enviro.yml` as needed.
@@ -41,9 +44,9 @@ which accounts for more variations in system configurations.
 
 Then install this package:
 ```
-pip install --user enviro-client
+pip install --user rpi-enviro-monitor
 ```
-And see [install.sh](https://github.com/JWCook/enviro-client/blob/main/install.sh) for optional
+And see [install.sh](https://github.com/JWCook/rpi-enviro-monitor/blob/main/install.sh) for optional
 setup steps.
 
 ### Local development

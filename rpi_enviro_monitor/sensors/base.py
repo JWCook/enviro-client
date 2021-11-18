@@ -7,7 +7,7 @@ from typing import Tuple
 from loguru import logger
 from numpy import digitize
 
-from enviro_client.display import BLUE, CYAN, GREEN, RED, YELLOW, RGBColor
+from ..display import BLUE, CYAN, GREEN, RED, YELLOW, RGBColor
 
 # Default number of sensor readings to keep in history
 HISTORY_LEN = 160
