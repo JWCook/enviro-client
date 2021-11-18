@@ -20,9 +20,10 @@ def publish_loop(enviro):
 def run():
     enviro = Enviro()
 
-    # Run MQTT publish loop in a separate thread so it can run at a different interval than display
-    publish_thread = Thread(target=publish_loop, args=(enviro,), daemon=True)
-    publish_thread.start()
+    # Run MQTT publisher in a separate thread so it can run at a different interval than display
+    if enviro.mqtt:
+        publish_thread = Thread(target=publish_loop, args=(enviro,), daemon=True)
+        publish_thread.start()
 
     # Run display loop in main thread
     try:

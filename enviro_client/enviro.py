@@ -42,7 +42,9 @@ class Enviro:
         self.mode = 0
         self.start_time = time()
 
+        # Configure display
         display_interval = self.config['display']['interval']
+        self.display = Display(interval=self.config['display']['interval'])
 
         # Proximity sensor is used internally, but not directly displayed on screen
         self.proximity = ProximitySensor()
@@ -56,9 +58,6 @@ class Enviro:
             LightSensor(display_interval, ltr559=self.proximity.ltr559),
             NoiseSensor(display_interval),
         )
-
-        # Configure display
-        self.display = Display(interval=self.config['display']['interval'])
 
         # Configure MQTT client, if enabled
         self.mqtt = None

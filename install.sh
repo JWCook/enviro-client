@@ -1,20 +1,26 @@
 #!/usr/bin/env bash
-# Minimal install script, mostly adapted from:
+# Minimal install script, which should work for a fresh RPi OS install.
+# Mostly adapted from:
 # https://github.com/pimoroni/enviroplus-python#installing
 
-# TODO: Install from PyPI/git without cloning
-# DEFAULT_CONFIG=https://raw.githubusercontent.com/JWCook/enviro-client/main/enviro.yml
-# SYSTEMD_UNIT=https://raw.githubusercontent.com/JWCook/enviro-client/main/enviro.service
+# Local config files
 BOOT_CONFIG=/boot/config.txt
 APP_CONFIG=~/.config/enviro.yml
+SYSTEMD_UNIT=/etc/systemd/system/enviro.service
 
-
+# Remote config files to download, if needed
+APP_CONFIG_URL=https://raw.githubusercontent.com/JWCook/enviro-client/main/enviro.yml
+SYSTEMD_UNIT_URL=https://raw.githubusercontent.com/JWCook/enviro-client/main/enviro.service
 
 function append-config() {
-    sed -i "s/^#$1/$1/" $BOOT_CONFIG
+    sudo sed -i "s/^#$1/$1/" $BOOT_CONFIG
     if ! grep -q "^$1" $BOOT_CONFIG; then
-        printf "$1\n" >> $BOOT_CONFIG
+        sudo printf "$1\n" >> $BOOT_CONFIG
     fi
+}
+
+function pyfile() {
+    python -c "import $@; print($@.__file__)" | sed 's/\.pyc/\.py/'
 }
 
 # Set up I2C, SPI, and UART (if not already done)
@@ -22,18 +28,33 @@ sudo raspi-config nonint do_spi 0
 sudo raspi-config nonint do_i2c 0
 sudo raspi-config nonint do_serial 1
 sudo raspi-config nonint set_config_var enable_uart 1 $BOOT_CONFIG
-sudo append-config 'dtoverlay=pi3-miniuart-bt'
-sudo append-config 'dtoverlay=adau7002-simple'
+append-config 'dtoverlay=pi3-miniuart-bt'
+append-config 'dtoverlay=adau7002-simple'
 
-# Install system and python packages
-sudo apt-get install -y libportaudio2
-pip install --user -Ue .
-# pip install --user -U enviro-client
+# Install system packages
+sudo apt-get update
+sudo apt-get install -y libopenjp2-7 libportaudio2 python3-rpi.gpio
 
-# Copy config file with default settings
-test -f $APP_CONFIG && cp enviro.yml $APP_CONFIG
+# Development mode: install from source
+if [ -f pyproject.toml ]; then
+    pip install --user -U '.'
+# Otherwise install from PyPI
+else
+    pip install --user -U enviro-client
+fi
 
-# Install as a systemd service and run on startup
-sudo cp enviro.service /etc/systemd/system/
+# Install default config file
+if [ ! -f $APP_CONFIG ]; then
+    curl -fLo $APP_CONFIG $APP_CONFIG_URL
+fi
+
+# Install systemd service and run on startup
+if [ ! -f $SYSTEMD_UNIT ]; then
+    curl -fLo enviro.service $SYSTEMD_UNIT_URL
+    # Update unit file to point to wherever enviro_client has been installed
+    entry_point=$(pyfile enviro_client.console)
+    sed -i "s|{{ENTRY_POINT}}|$entry_point|" enviro.service
+    sudo mv enviro.service $SYSTEMD_UNIT
+fi
 sudo systemctl enable enviro.service
 sudo systemctl start  enviro.service

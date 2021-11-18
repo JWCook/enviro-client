@@ -11,42 +11,50 @@ gas and PM sensors.
 
 ## Features
 `enviro-client` combines the following features into one program, intended to be used as a systemd service:
-* Display sensor reading bar charts on the LCD
+* Display bar charts for individual sensor metrics
 * Display combined sensor readings and device status
 * Toggle between display modes using the proximity sensor
 * Publish sensor readings via MQTT (optional)
-* Configure display and MQTT settings via a yaml config file
+* Configure via a yaml config file
 
-Alternatively, `enviro-client` can be used as a python library if you don't plan on using these
-features as a service, or if you want different behavior.
+`enviro-client` can also be used as a python library, if you don't plan on using it as a service,
+or if you want different behavior.
 
 ## Installation
 
-### Quick installation (WIP)
+### Requirements
+* Raspberry Pi OS 'Bullseye' (not tested on earlier releases)
+* Python 3.9+
+
+### Quick installation
 To install and configure `enviro-client` as a systemd service:
 ```
-git clone https://github.com/JWCook/enviro-client
-cd enviro-client
+curl -fLo install.sh https://raw.githubusercontent.com/JWCook/enviro-client/main/install.sh
 ./install.sh
 ```
-Update config settings in `~/.config/enviro.yml`
+Then, update config settings in `~/.config/enviro.yml` as needed.
 
 ### Alternate installation
-First, set up system dependencies with the
-[enviroplus-python install script](https://github.com/pimoroni/enviroplus-python#installing).
+If the included script doesn't work for you, try the
+[enviroplus-python install script](https://github.com/pimoroni/enviroplus-python#installing),
+which accounts for more variations in system configurations.
 
-Then:
+Then install this package:
 ```
-pip install --user -U enviro-client
+pip install --user enviro-client
+```
+And see [install.sh](https://github.com/JWCook/enviro-client/blob/main/install.sh) for optional
+setup steps.
+
+### Local development
+Requires [poetry](https://python-poetry.org/docs/master/#installation).
+```python
+poetry install
 ```
 
-Copy the [included config file](https://raw.githubusercontent.com/JWCook/enviro-client/main/enviro.yml)
-to `~/.config/enviro.yml`, and update as needed.
-
-If you would like to run `enviro-client` as a service, copy the
-[included service file](https://raw.githubusercontent.com/JWCook/enviro-client/main/enviro.service)
-to `/etc/systemd/system/enviro.service` and enable:
-```
-sudo systemctl enable enviro.service
-sudo systemctl start  enviro.service
-```
+## Credits
+* Most features are adapted from the examples in [enviroplus-python](https://github.com/pimoroni/enviroplus-python)
+* MQTT client is adapted from [rpi-enviro-mqtt](https://github.com/robmarkcole/rpi-enviro-mqtt)
+  (also in enviroplus-python examples)
+* Example systemd service is taken from
+  [rpi-enviro-mqtt](https://github.com/robmarkcole/rpi-enviro-mqtt)

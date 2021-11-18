@@ -10,23 +10,22 @@ readme = "README.md"
 python = "^3.9"
 
 # Library dependencies
-cffi = "*"
-fonts = ">=0.0.3"
-font-roboto = ">=0.0.1"
+cffi = "^1.14"
+fonts = "*"
+font-roboto = "*"
 loguru = "^0.5"
-numpy = {version = "^1.21.4", python = "<3.11"}
+numpy = {version = ">=1.20", python = "<3.11"}
 paho-mqtt = "^1.6"
 pillow = "^8.0"
 pyyaml = "^6.0"
 
 # Hardware dependencies/drivers
-ltr559 = ">=0.1.1"
-pimoroni-bme280 = ">=0.1.1"
-'rpi.gpio' = "^0.7"
+ltr559 = "^0.1"
+pimoroni-bme280 = "^0.1"
 smbus = "^1.1"
-sounddevice = "^0.4.3"
+sounddevice = "^0.4"
 spidev = "^3.5"
-st7735 = ">=0.0.4"
+st7735 = "^0.0.4"
 
 [tool.poetry.dev-dependencies]
 coverage = "^6.0"

@@ -1,11 +1,9 @@
-# Example systemd service taken from: https://github.com/robmarkcole/rpi-enviro-mqtt
 [Unit]
-Description=Enviro MQTT Publisher
+Description=Enviro Display and MQTT Client
 After=network.target
 
-# TODO: option to point to user site-packages instead of locally cloned repo
 [Service]
-ExecStart=/usr/bin/python3 /home/pi/enviro-client/enviro_client/console.py
+ExecStart=/usr/bin/python3 {{ENTRY_POINT}}
 WorkingDirectory=/home/pi/enviro-client
 StandardOutput=inherit
 StandardError=inherit

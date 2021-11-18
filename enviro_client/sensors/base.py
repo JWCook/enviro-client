@@ -1,3 +1,4 @@
+# TODO: Refactor this into 'Sensors' and 'Metrics' (for multiple metrics per sensor)
 from abc import abstractmethod
 from collections import deque
 from time import time
