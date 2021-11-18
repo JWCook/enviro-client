@@ -1,0 +1,15 @@
+# Example systemd service taken from: https://github.com/robmarkcole/rpi-enviro-mqtt
+[Unit]
+Description=Enviro MQTT Publisher
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/pi/enviro-client/enviro_client/console.py
+WorkingDirectory=/home/pi/enviro-client
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
