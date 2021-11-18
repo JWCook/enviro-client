@@ -38,7 +38,7 @@ class Sensor:
     def __init__(self, min_interval: float = 0.1, history_len: int = HISTORY_LEN):
         logger.debug(f'Initializing {self.__class__.__name__}')
         self.history = deque([0] * history_len, maxlen=history_len)
-        self.last_read = 0
+        self.last_read = 0.0
         self.min_interval = min_interval
 
     @property
